@@ -22,7 +22,6 @@ _CUSTOMERS: Dict[str, Dict[str, Any]] = {
 }
 
 
-
 def get_customer(customer_name: str) -> str:
     """
     Return information about an ERPNext customer.

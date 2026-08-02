@@ -9,6 +9,12 @@ from tools.customer import get_customer
 
 load_dotenv()
 
+questions = [
+    "Tell me about our company,Include the company name, country, currency, fiscal year, and industry.",
+    "Tell me about customer ABC Traders,Include the customer name, customer group, territory, and customer type.",
+    "Tell me about customer XYZ Stores,Include the customer name, customer group, territory, and customer type."
+]
+
 async def main():
     config = LocalAgentConfig(
         api_key=os.getenv("GEMINI_API_KEY"),
@@ -22,33 +28,9 @@ Always use available tools whenever appropriate.
     )
 
     async with Agent(config) as agent:
-        response = await agent.chat(
-            """
-            Tell me about our company,
-            Include the company name, country, currency, fiscal year, and industry.
-        """
-        )
-
-        print(await response.text())
-
-        response = await agent.chat(
-                    """
-                    Tell me about customer ABC Traders,
-                    Include the customer name, customer group, territory, and customer type.
-                """
-                )
-        
-        print(await response.text())
-
-        response = await agent.chat(
-                            """
-                            Tell me about customer XYZ Stores,
-                            Include the customer name, customer group, territory, and customer type.
-                        """
-                        )
-                
-        print(await response.text())
-
+        for question in questions:
+            response = await agent.chat(question)
+            print(await response.text())
 
 if __name__ == "__main__":
     asyncio.run(main())
