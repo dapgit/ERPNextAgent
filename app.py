@@ -1,14 +1,10 @@
 import asyncio
-import os
 
 #from dotenv import load_dotenv
 #from google.antigravity import Agent, LocalAgentConfig
 
-import config
-from tools.company import get_company_information
-from tools.customer import get_customer
 from agent.assistant import create_agent
-import config
+
 
 #load_dotenv()
 
@@ -20,34 +16,29 @@ questions = [
 ]
 """
 
-async def main():
-#    config = LocalAgentConfig(
-#        api_key=os.getenv("GEMINI_API_KEY"),
-#        system_instructions="""
-#You are an ERP assistant.
-#Always use available tools whenever appropriate.
-#""", 
-#    tools=[
-#        get_company_information, get_customer
-#    ]
-#    )
- 
-    local_config = create_local_agent_config()
-    create_agent(local_config)
-
+def print_banner():
     print("=====================================================================================\n")
     print("Welcome to the ERP Assistant! You can ask questions about your company and customers.\n")
     print("Type 'exit' or 'quit' to end the session.\n")
     print("=====================================================================================\n")
-        
-    while True:
 
-        question = input("Ask your question: ")
+async def chat_loop(local_agent):
+    while True:
+        question = input("Ask your question: ").strip()
+        if not question:
+            continue
         if question.lower() in ["exit", "quit"]:
             break
 
-        response = await agent.chat(question)
+        response = await local_agent.chat(question)
         print(await response.text())
+
+
+async def main():
+    print_banner()
+
+    async with create_agent() as local_agent:
+        await chat_loop(local_agent)
 
 if __name__ == "__main__":
     asyncio.run(main())
