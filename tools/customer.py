@@ -1,6 +1,6 @@
 from typing import Dict, Any
 
-CUSTOMERS: Dict[str, Dict[str, Any]] = {
+_CUSTOMERS: Dict[str, Dict[str, Any]] = {
     "abc traders": {
         "name": "ABC Traders",
         "group": "Traders",
@@ -21,7 +21,6 @@ CUSTOMERS: Dict[str, Dict[str, Any]] = {
     },
 }
 
-_CUSTOMERS = CUSTOMERS
 
 
 def get_customer(customer_name: str) -> str:
@@ -38,9 +37,9 @@ def get_customer(customer_name: str) -> str:
         customer type.
     """
     key = customer_name.lower().strip()
-    trader = CUSTOMERS.get(key)
+    trader = _CUSTOMERS.get(key)
     if not trader:
-        for k, v in CUSTOMERS.items():
+        for k, v in _CUSTOMERS.items():
             if k in key or key in k:
                 trader = v
                 break

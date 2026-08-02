@@ -40,6 +40,15 @@ Always use available tools whenever appropriate.
         
         print(await response.text())
 
+        response = await agent.chat(
+                            """
+                            Tell me about customer XYZ Stores,
+                            Include the customer name, customer group, territory, and customer type.
+                        """
+                        )
+                
+        print(await response.text())
+
 
 if __name__ == "__main__":
     asyncio.run(main())
