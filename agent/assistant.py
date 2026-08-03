@@ -1,13 +1,9 @@
-import asyncio
-import os
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 
 from google.antigravity import Agent, LocalAgentConfig
 
 from config import create_local_agent_config
-
-load_dotenv()
 
 @asynccontextmanager
 async def create_agent():

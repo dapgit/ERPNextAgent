@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from google.antigravity import Agent, LocalAgentConfig
+from google.antigravity import LocalAgentConfig
 
 from agent.prompts import SYSTEM_PROMPT
 from tools.company import get_company_information

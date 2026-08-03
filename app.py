@@ -17,10 +17,12 @@ questions = [
 """
 
 def print_banner():
-    print("=====================================================================================\n")
-    print("Welcome to the ERP Assistant! You can ask questions about your company and customers.\n")
-    print("Type 'exit' or 'quit' to end the session.\n")
-    print("=====================================================================================\n")
+    print("""
+        =====================================================================================
+        Welcome to the ERP Assistant! You can ask questions about your company and customers.
+        Type 'exit' or 'quit' to end the session.
+        =====================================================================================
+    """)
 
 async def chat_loop(local_agent):
     while True:
