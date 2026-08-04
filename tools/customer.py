@@ -14,4 +14,12 @@ def get_customer(customer_name: str) -> str:
         territory,
         customer type.
     """
-    return customer_service.get_customer(customer_name)
+    customer = customer_service.get_customer(customer_name)
+
+    if customer is None:
+        return f"No customer found with name '{customer_name}'."
+
+    return f"""Customer Name: {customer.name}
+Customer Group: {customer.customer_group}
+Territory: {customer.territory}
+Customer Type: {customer.customer_type}"""

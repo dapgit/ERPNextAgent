@@ -1,3 +1,6 @@
+from services import company_service
+
+
 def get_company_information() -> str:
     """
     Return information about the company.
@@ -5,17 +8,14 @@ def get_company_information() -> str:
     Returns:
         str: A string containing the company information.
     """
-    # Placeholder for actual implementation
-    # company_info = "Company Name: Example Corp\nAddress: 1234 Example St, City, Country\nPhone: (123) 456-7890"
-    # return company_info
-    return """ 
-Company Name : ABC Traders Pvt Ltd
+    company = company_service.get_company_information()
 
-Country : India
+    return f"""Company Name : {company.name}
 
-Currency : INR
+Country : {company.country}
 
-Fiscal Year : 2026-2027
+Currency : {company.currency}
 
-Industry : Distribution
-"""
+Fiscal Year : {company.fiscal_year}
+
+Industry : {company.industry}"""
