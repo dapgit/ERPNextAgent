@@ -43,8 +43,31 @@ Objective: replace the mock data source with a real ERPNext backend without chan
 - `python3 app.py` → "Tell me about our company" now returns real ERPNext data (`A Sports`, India, INR) instead of the `ABC Traders Pvt Ltd` mock.
 - Full test suite: 7 passed.
 
+## Milestone 5.4 — Repository Factory, Logging, Customer Repository
+
+**Goal:** act on Sprint 5.3 review feedback (centralize repository selection, add simple logging) and repeat the Company pattern for Customer — the architecture-scaling test.
+
+- `repositories/factory.py` (new) — `get_company_repository()` / `get_customer_repository()` are now the single place that decides Mock vs. ERPNext (REST today, MCP later). Instances are memoized so the underlying `ERPNextRESTClient`/`requests.Session` is reused across calls, not recreated per request. `company_repository.py` / `customer_repository.py` no longer contain selection logic — their module-level convenience functions delegate to the factory via a deferred import (avoids a factory ↔ repository circular import).
+- `utils/logger.py` (new) — thin wrapper over Python's `logging` module (`get_logger(name)`), level controlled by the new `settings.get_log_level()` (`LOG_LEVEL` env var, defaults to `INFO`). Deliberately simple `INFO`/`ERROR` logging, not OpenTelemetry — tracing/spans are planned for Sprint 6+ per the agreed roadmap (Sprint 5: logging, Sprint 6: OTel tracer/spans, Sprint 7: metrics, Sprint 8+: exporters/dashboards).
+- `clients/erpnext_rest_client.py` — `get()` now logs `ERPNext request: GET <path>` before the call and `ERPNext response: <status> GET <path> in <N>ms` after (or an `ERROR` line on timeout/connection failure), matching the request/response/duration trace shape from the review.
+- `repositories/company_repository.py` / `repositories/customer_repository.py` — each ERPNext repository logs one line of business context before calling the client (e.g. `Fetching Company 'A Sports' from ERPNext`).
+- `repositories/customer_repository.py` — rewritten with the same shape as Company:
+  - `CustomerRepository(ABC)` with abstract `get_customer(customer_name)`.
+  - `MockCustomerRepository` — the original in-memory dict-backed lookup, now behind the interface.
+  - `ERPNextCustomerRepository(client=None)` — tries an exact `get_doc("Customer", name)` first; on `ERPNextResourceNotFoundError` falls back to a partial match via `get_list("Customer", filters=[["Customer", "customer_name", "like", "%name%"]])`, verified against the live instance (e.g. "Grant" → "Grant Plastics Ltd."). Returns `None` when nothing matches, same contract as the mock. Missing `customer_group`/`territory` (both nullable in ERPNext) map to `"Not set"`.
+  - Module-level `get_customer()` delegates to `factory.get_customer_repository()`.
+- Tests: `tests/test_repository_factory.py` (new — selection + memoization, with `monkeypatch`), `tests/test_customer_repository.py` (new — ABC contract, exact match, partial-match fallback, no-match case), all using a fake client so nothing touches the network except the existing live connectivity test.
+
+**Verified end-to-end:**
+- `git diff --stat` on `services/company_service.py`, `services/customer_service.py`, `tools/company.py`, `tools/customer.py`, `models/company.py`, `models/customer.py` — zero diff.
+- Ran through the Tool layer live: Company lookup returns `A Sports`; `get_customer("Grant")` logs an exact-match 404 followed by a successful partial-match fetch of `Grant Plastics Ltd.`; `get_customer("Nobody At All")` cleanly returns "No customer found ...". Log output showed the full request/response/duration trace for every call.
+- Full test suite: 14 passed.
+
 ## Not yet done
 
-- Customer, Item, and Supplier repositories still return mock data — same ABC + Mock/ERPNext pattern applies when those are tackled.
+- Item and Supplier repositories still return mock data (Item repository not started) — same ABC + Mock/ERPNext pattern applies when those are tackled.
 - No resolution yet for `fiscal_year`/`industry` not existing on ERPNext's Company doctype (currently a placeholder string).
-- No retry/backoff, logging, or write operations (POST/PUT/DELETE) — out of scope for Sprint 5 per the "keep it intentionally small" direction.
+- REST client stays GET-only (`get_doc`/`get_list`); no `_post()`/`_put()`/`_delete()` yet since nothing needs them.
+- No domain-mapper extraction yet — the inline `_to_domain()` static methods are still simple enough per review guidance ("I wouldn't do that yet").
+- No retry/backoff or write operations (POST/PUT/DELETE) — out of scope for Sprint 5.
+- OpenTelemetry (traces, spans, metrics) intentionally deferred to Sprint 6+; Sprint 5 uses plain `logging` only.
