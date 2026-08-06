@@ -41,3 +41,16 @@ def get_erpnext_api_secret():
         str: The ERPNext API secret.
     """
     return os.getenv("ERPNEXT_API_SECRET")
+
+
+def get_erpnext_company_name():
+    """
+    Retrieve the name of the ERPNext Company document to use.
+
+    Optional: if unset, the ERPNext repository falls back to the first
+    company visible to the configured API user.
+
+    Returns:
+        str | None: The ERPNext Company name.
+    """
+    return os.getenv("ERPNEXT_COMPANY")

@@ -1,12 +1,12 @@
 import pytest
 
-from clients.erpnext_client import ERPNextClient
+from clients.erpnext_rest_client import ERPNextRESTClient
 from settings import get_erpnext_url
-from utils.exceptions import ERPNextClientError
+from utils.exceptions import ERPNextError
 
 
 def test_client_reuses_a_single_session_with_auth_headers_set_once():
-    client = ERPNextClient(
+    client = ERPNextRESTClient(
         base_url="http://localhost:8080",
         api_key="key",
         api_secret="secret",
@@ -21,21 +21,33 @@ def test_client_reuses_a_single_session_with_auth_headers_set_once():
     assert client._session is session
 
 
+def test_get_doc_and_get_list_build_expected_resource_paths():
+    client = ERPNextRESTClient(base_url="http://localhost:8080", api_key="k", api_secret="s")
+
+    assert client._build_url("/api/resource/Company/A Sports") == (
+        "http://localhost:8080/api/resource/Company/A Sports"
+    )
+    assert client._build_url("/api/resource/Company") == (
+        "http://localhost:8080/api/resource/Company"
+    )
+
+
 def test_client_can_retrieve_company_information_from_erpnext():
     """
-    Independent connectivity check for the ERPNext client.
+    Independent connectivity check for the ERPNext REST client.
 
-    Talks to ERPNext directly through ERPNextClient only, with no Repository
-    or Service layer involved, so that connectivity and authentication
-    issues are isolated before those layers are wired up (Milestone 5.2).
+    Talks to ERPNext directly through ERPNextRESTClient only, with no
+    Repository or Service layer involved, so that connectivity and
+    authentication issues are isolated before those layers are wired up
+    (Milestone 5.2).
     """
     if not get_erpnext_url():
         pytest.skip("ERPNEXT_URL is not configured")
 
-    with ERPNextClient() as client:
+    with ERPNextRESTClient() as client:
         try:
-            response = client.get("/api/resource/Company")
-        except ERPNextClientError as exc:
+            response = client.get_list("Company")
+        except ERPNextError as exc:
             pytest.skip(f"ERPNext is not reachable: {exc}")
 
     assert "data" in response
