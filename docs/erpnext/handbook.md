@@ -1,13 +1,13 @@
 ---
 title: ERPNext Integration Handbook
-status: planned
+status: in-progress
 audience: contributors
-last_reviewed: 2026-08-04
+last_reviewed: 2026-08-06
 ---
 
 # ERPNext Integration Handbook
 
-ERPNext REST integration is planned, not complete. This handbook defines the boundary and implementation checklist for the future repository adapter without claiming an endpoint, authentication mechanism, or permission model has already been implemented.
+ERPNext REST integration is in progress. Sprint 5.1 and 5.2 implement the client boundary, token-based configuration, typed error model, and a REST-backed Company repository. The remaining work is deliberately tracked as remaining scope rather than treated as complete.
 
 ## Chapters
 
@@ -21,22 +21,20 @@ ERPNext REST integration is planned, not complete. This handbook defines the bou
 flowchart LR
   T[Tool] --> S[Service]
   S --> P[Repository protocol]
-  P --> A[ERPNext repository adapter - planned]
-  A --> C[HTTP client - planned]
-  C --> E[ERPNext REST API - planned]
+  P --> A[ERPNext Company repository]
+  A --> C[ERPNext REST client]
+  C --> E[ERPNext REST API]
 ```
 
 Only the planned adapter/client knows ERPNext request and response details. The service works with domain models and domain errors.
 
 ## Implementation checklist
 
-- Confirm the target ERPNext version, required DocTypes, and endpoint contracts.
-- Choose and document the approved authentication mechanism and secret storage.
-- Implement a narrowly scoped HTTP client with timeouts, safe logging, and structured errors.
-- Map external payloads to domain models at the repository boundary.
+- Confirm the target ERPNext version and endpoint contracts before expanding beyond Company.
+- Gather controlled live integration evidence for the implemented Company path.
+- Add further entity mappings with unit tests using mocked transport.
 - Define authorization checks in the service/domain layer and honour backend permissions.
-- Add unit tests with mocked transport and integration tests against a controlled instance.
-- Update the relevant ADR, Sprint 5 journal, changelog, architecture pages, and audit.
+- Consider resilience and observability after the first transport path is stable.
 
 ## Error and security rules
 
@@ -48,13 +46,14 @@ Repositories should translate API payloads into the project’s domain models. T
 
 ## Completion evidence
 
-Sprint 5 should not be marked complete until a real repository adapter, documented configuration, error model, tests, and an updated sprint journal exist.
+Sprint 5 should not be marked complete until its remaining repository, controlled integration-test, and delivery evidence are complete. The implemented Company slice is recorded in the [Sprint 5 journal](../journal/sprint-05-erpnext-rest-foundation.md).
 
 ## Revision history
 
 | Date | Change |
 | --- | --- |
 | 2026-08-04 | Created planned-integration guide from the roadmap and repository design. |
+| 2026-08-06 | Updated the handbook for the completed Sprint 5.1–5.2 foundation. |
 
 ---
 

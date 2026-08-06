@@ -43,4 +43,4 @@ ERPNext REST integration, authentication, error handling, logging, and automated
 
 ---
 
-Previous: [Sprint 3](sprint-03-interactive-application.md) · Next: [Roadmap](../project-roadmap.md) · [Journal index](index.md)
+Previous: [Sprint 3](sprint-03-interactive-application.md) · Next: [Sprint 5](sprint-05-erpnext-rest-foundation.md) · [Journal index](index.md)

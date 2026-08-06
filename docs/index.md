@@ -2,12 +2,12 @@
 title: Documentation Index
 status: active
 audience: contributors
-last_reviewed: 2026-08-04
+last_reviewed: 2026-08-06
 ---
 
 # Documentation Index
 
-This is the entry point for ERPNextAgent documentation. The repository is currently documented through **Sprint 4**; material for later sprints is planning guidance, not an implementation record.
+This is the entry point for ERPNextAgent documentation. Sprint 5 is in progress: milestones 5.1 and 5.2 are implemented and recorded; later Sprint 5 work remains planned.
 
 ## Start here
 
@@ -23,7 +23,7 @@ This is the entry point for ERPNextAgent documentation. The repository is curren
 - [Tools execution](architecture/tools-execution.md)
 - [Service layer](architecture/services-layer.md)
 - [Repository layer](architecture/repository-layer.md)
-- [Future ERPNext integration architecture](architecture/future-erpnext.md)
+- [ERPNext REST integration architecture](architecture/future-erpnext.md)
 
 ## Decision and delivery records
 
@@ -62,6 +62,7 @@ flowchart TD
 | Date | Change |
 | --- | --- |
 | 2026-08-04 | Created documentation navigation and governance entry point. |
+| 2026-08-06 | Added Sprint 5 implementation navigation and updated integration wording. |
 
 ---
 

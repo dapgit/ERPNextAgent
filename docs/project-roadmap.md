@@ -2,7 +2,7 @@
 title: Project Roadmap
 status: active
 audience: contributors
-last_reviewed: 2026-08-04
+last_reviewed: 2026-08-06
 ---
 
 # Project Roadmap
@@ -21,8 +21,8 @@ ERPNextAgent is being developed incrementally using a sprint-based approach. Eac
 | Sprint 2 | Custom Tools | ✅ Complete |
 | Sprint 3 | Interactive Application | ✅ Complete |
 | Sprint 4 | Repository Pattern | ✅ Complete |
-| Sprint 5 | ERPNext REST Integration | ⏳ Planned |
-| Sprint 6 | Authentication & Session Management | ⏳ Planned |
+| Sprint 5 | ERPNext REST Integration | 🚧 In progress — 5.1 and 5.2 complete |
+| Sprint 6 | Observability | ⏳ Planned |
 | Sprint 7 | ERP Business Operations | ⏳ Planned |
 | Sprint 8 | Memory & Context | ⏳ Planned |
 | Sprint 9 | Multi-Agent Architecture | ⏳ Planned |
@@ -104,16 +104,26 @@ ERPNextAgent is being developed incrementally using a sprint-based approach. Eac
 
 ### Objectives
 
-- Replace mock repositories
-- Connect to ERPNext REST API
-- Authentication
+- Establish a reusable REST integration boundary
+- Connect the Company repository to ERPNext REST API
+- Keep upper-layer contracts stable
 
-Expected Deliverables:
+Completed in 5.1 and 5.2:
 
-- ERPNext Repository
-- API Client
-- Configuration Management
-- Error Handling
+- `clients/ERPNextRESTClient` with session reuse, token authentication, URL construction, JSON parsing, and typed integration errors.
+- Environment-based ERPNext configuration.
+- `CompanyRepository` contract with mock and REST implementations.
+- JSON-to-`Company` mapping and unit tests using an injected fake client.
+
+Remaining Sprint 5 scope:
+
+- Extend REST-backed repositories beyond Company.
+- Perform controlled live integration verification and document the evidence.
+- Add only the resilience features justified by that evidence.
+
+## Sprint 6 – Observability
+
+OpenTelemetry was evaluated during Sprint 5 and deferred so the first REST path can stabilize without cross-cutting instrumentation. Sprint 6 will define the observability package, tracing configuration, span boundaries, safe attributes, and exporter strategy. Python logging remains appropriate for startup and exceptional diagnostics.
 
 ---
 
@@ -139,6 +149,7 @@ Completed-sprint evidence is maintained in the [sprint journals](journal/index.m
 | Date | Change |
 | --- | --- |
 | 2026-08-04 | Added metadata and links to the documentation delivery records. |
+| 2026-08-06 | Marked Sprint 5.1–5.2 complete and added the Sprint 6 observability decision. |
 
 ---
 

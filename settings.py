@@ -43,16 +43,6 @@ def get_erpnext_api_secret():
     return os.getenv("ERPNEXT_API_SECRET")
 
 
-def get_log_level():
-    """
-    Retrieve the logging level from environment variables.
-
-    Returns:
-        str: The logging level name, defaulting to "INFO".
-    """
-    return os.getenv("LOG_LEVEL", "INFO")
-
-
 def get_erpnext_company_name():
     """
     Retrieve the name of the ERPNext Company document to use.

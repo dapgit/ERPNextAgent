@@ -3,11 +3,8 @@ from typing import Any, Dict, Optional
 
 from clients.erpnext_rest_client import ERPNextRESTClient
 from models.company import Company
-from settings import get_erpnext_company_name
+from settings import get_erpnext_company_name, get_erpnext_url
 from utils.exceptions import ERPNextResourceNotFoundError
-from utils.logger import get_logger
-
-logger = get_logger(__name__)
 
 NOT_TRACKED_BY_ERPNEXT = "Not tracked on Company in ERPNext"
 
@@ -48,7 +45,6 @@ class ERPNextCompanyRepository(CompanyRepository):
 
     def get_company_information(self) -> Company:
         company_name = self._company_name or self._first_available_company_name()
-        logger.info("Fetching Company '%s' from ERPNext", company_name)
         document = self._client.get_doc("Company", company_name)
         return self._to_domain(document["data"])
 
@@ -74,7 +70,14 @@ class ERPNextCompanyRepository(CompanyRepository):
         )
 
 
-def get_company_information() -> Company:
-    from repositories.factory import get_company_repository
+def _create_repository() -> CompanyRepository:
+    if get_erpnext_url():
+        return ERPNextCompanyRepository()
+    return MockCompanyRepository()
 
-    return get_company_repository().get_company_information()
+
+_repository = _create_repository()
+
+
+def get_company_information() -> Company:
+    return _repository.get_company_information()

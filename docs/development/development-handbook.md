@@ -2,12 +2,12 @@
 title: Development Handbook
 status: active
 audience: contributors
-last_reviewed: 2026-08-04
+last_reviewed: 2026-08-06
 ---
 
 # Development Handbook
 
-This handbook turns the documented architecture into a working contribution path. It reflects the design recorded through Sprint 4; integration work beyond that point remains planned.
+This handbook turns the documented architecture into a working contribution path. It reflects the implemented Sprint 5.1–5.2 client and Company-repository boundary; remaining integration work remains planned.
 
 ## Chapters
 
@@ -32,7 +32,8 @@ This handbook turns the documented architecture into a working contribution path
 | Application/agent | Startup and conversation orchestration | ERP policy and data access |
 | Tool | Model-facing input/output translation | Workflows and transport calls |
 | Service | Business rules and coordination | SDK-specific code and raw HTTP |
-| Repository | Data retrieval/persistence and mapping | Presentation formatting |
+| Repository | Entity data retrieval/persistence and mapping | Presentation formatting and raw HTTP |
+| Client | HTTP session, authentication headers, timeouts, parsing, transport errors | Entity mapping and business policy |
 | Model | Domain representation | SDK or transport dependencies |
 
 ## Change flow
@@ -61,6 +62,7 @@ Follow the [style guide](../documentation-style-guide.md). A completed sprint ne
 | Date | Change |
 | --- | --- |
 | 2026-08-04 | Created contribution workflow aligned to the documented architecture. |
+| 2026-08-06 | Added the Sprint 5 client-layer boundary. |
 
 ---
 

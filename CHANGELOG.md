@@ -2,7 +2,7 @@
 title: Changelog
 status: active
 audience: contributors
-last_reviewed: 2026-08-04
+last_reviewed: 2026-08-06
 ---
 
 # Changelog
@@ -12,6 +12,28 @@ All notable changes to this project will be documented in this file.
 This project follows a sprint-based development approach. Each sprint represents a logical milestone in the evolution of the ERPNext AI Assistant.
 
 ---
+
+# Sprint 5 – ERPNext REST Integration (in progress)
+
+## Completed milestones
+
+### 5.1 — Integration boundary and configuration
+
+- Added the `clients/` package and `ERPNextRESTClient` boundary.
+- Added environment-backed ERPNext URL, API key, API secret, and optional Company settings.
+- Added a distinct ERPNext exception hierarchy.
+
+### 5.2 — Company lookup through REST
+
+- Added `CompanyRepository` as an abstract contract with mock and REST-backed implementations.
+- Added dependency injection for `ERPNextCompanyRepository` so its REST client can be replaced in tests.
+- Added document and list helpers, a reusable `requests.Session`, authentication headers, URL construction, JSON parsing, timeout handling, and context-manager cleanup.
+- Added repository mapping tests and an opt-in connectivity test.
+
+## Deferred
+
+- Customer remains backed by mock data; its REST repository is not yet implemented.
+- Retries, write operations, structured logging, and OpenTelemetry are not implemented. OpenTelemetry was evaluated and deliberately deferred to Sprint 6.
 
 # Sprint 4 – Repository Pattern
 
@@ -127,16 +149,10 @@ This project follows a sprint-based development approach. Each sprint represents
 
 # Upcoming
 
-## Sprint 5 (Planned)
+## Sprint 5 (in progress)
 
-- ERPNext REST Client
-- Authentication
-- Session Management
-- Repository implementation using ERPNext REST API
-- Error handling
-- Logging
-- Unit Tests
-- Integration Tests
+- 5.1 and 5.2 are recorded above.
+- Remaining scope includes additional repositories, controlled end-to-end verification, and follow-on resilience work.
 
 ---
 
@@ -148,6 +164,7 @@ This project follows a sprint-based development approach. Each sprint represents
 | 0.2.0 | Sprint 2 |
 | 0.3.0 | Sprint 3 |
 | 0.4.0 | Sprint 4 |
+| 0.5.0 (in progress) | Sprint 5.1–5.2 |
 
 Future releases will continue following semantic versioning aligned with sprint milestones.
 
@@ -156,6 +173,7 @@ Future releases will continue following semantic versioning aligned with sprint 
 | Date | Change |
 | --- | --- |
 | 2026-08-04 | Added documentation-system metadata and navigation. |
+| 2026-08-06 | Recorded Sprint 5.1–5.2 implementation and observability deferral. |
 
 ---
 

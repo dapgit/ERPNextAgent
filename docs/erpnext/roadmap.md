@@ -1,15 +1,15 @@
 ---
 title: ERPNext Handbook — Integration Roadmap
-status: planned
+status: in-progress
 audience: contributors
-last_reviewed: 2026-08-04
+last_reviewed: 2026-08-06
 ---
 
 # Integration Roadmap
 
 ## Sprint 5
 
-Confirm the instance contract and least-privilege credentials; build a bounded HTTP client; map one read-only repository; test real queries against controlled data; and document errors and evidence.
+Completed: a bounded HTTP client, environment-backed token configuration, typed error handling, and a read-only Company repository mapping. Remaining: controlled live-query evidence and any additional entity migration.
 
 ## Subsequent increments
 
@@ -24,6 +24,7 @@ Each increment needs an approved endpoint/permission contract, an ADR when the a
 | Date | Change |
 | --- | --- |
 | 2026-08-04 | Added integration sequencing and decision gates. |
+| 2026-08-06 | Marked the Company REST foundation complete and retained remaining work as planned. |
 
 ---
 

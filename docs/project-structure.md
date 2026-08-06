@@ -2,7 +2,7 @@
 title: Project Structure
 status: active
 audience: contributors
-last_reviewed: 2026-08-04
+last_reviewed: 2026-08-06
 ---
 
 # Project Structure
@@ -30,6 +30,9 @@ ERPNextAgent/
 ├── services/
 │
 ├── repositories/
+│
+├── clients/
+│   └── erpnext_rest_client.py
 │
 ├── models/
 │
@@ -85,7 +88,19 @@ Responsibilities:
 
 - Data retrieval
 - Data persistence
-- ERPNext communication
+- Entity-oriented data access and mapping into domain models
+- Repository contracts and swappable implementations
+
+## clients/
+
+Responsibilities:
+
+- HTTP transport and URL construction
+- API-token headers and session lifecycle
+- Request timeout and response parsing
+- Translation of HTTP failures into integration exceptions
+
+The client deliberately has no knowledge of Company, Customer, or other domain entities.
 
 ---
 
@@ -134,7 +149,15 @@ Repository
 
 ↓
 
-ERPNext
+Repository implementation
+
+↓
+
+Client
+
+↓
+
+ERPNext REST API
 ```
 
 Each layer depends only on the layer immediately below it.
@@ -148,6 +171,7 @@ Read the [architecture overview](architecture/overview.md) for the rationale and
 | Date | Change |
 | --- | --- |
 | 2026-08-04 | Added metadata, cross-references, and revision history. |
+| 2026-08-06 | Added the clients layer and revised dependency flow for Sprint 5. |
 
 ---
 

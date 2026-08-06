@@ -1,13 +1,13 @@
 ---
 title: ERPNext Handbook — Overview
-status: planned
+status: in-progress
 audience: contributors
-last_reviewed: 2026-08-04
+last_reviewed: 2026-08-06
 ---
 
 # ERPNext Integration Overview
 
-ERPNext is the future system of record for ERPNextAgent. Sprint 4 deliberately leaves it outside the running application: current repositories use mock data so application behavior and integration behavior can be developed separately.
+ERPNext is the system of record being introduced into ERPNextAgent. Sprint 5.1–5.2 connect the Company capability through the REST API while Customer remains mock-backed.
 
 ## Boundary
 
@@ -15,13 +15,14 @@ ERPNext-specific endpoints, authentication, payloads, and permissions belong onl
 
 ## First integration scope
 
-Start with read-only customer and company lookup using a controlled ERPNext environment. This gives the project a small, observable path to validate connectivity, mapping, and safe failures before write operations are considered.
+The implemented path is read-only Company lookup using `ERPNextRESTClient` and `ERPNextCompanyRepository`. It validates configuration, mapping, and typed failures before write operations or broader entity migration are considered.
 
 ## Revision history
 
 | Date | Change |
 | --- | --- |
 | 2026-08-04 | Added ERPNext handbook overview. |
+| 2026-08-06 | Recorded the implemented Company REST path and remaining Customer migration. |
 
 ---
 

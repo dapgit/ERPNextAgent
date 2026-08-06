@@ -2,7 +2,7 @@
 title: ERPNextAgent
 status: active
 audience: contributors
-last_reviewed: 2026-08-04
+last_reviewed: 2026-08-06
 ---
 
 # ERPNextAgent
@@ -13,7 +13,7 @@ last_reviewed: 2026-08-04
 
 # Project Status
 
-**Current Sprint:** Sprint 4 Complete
+**Current Sprint:** Sprint 5 in progress (milestones 5.1 and 5.2 completed)
 
 | Area | Status |
 |------|--------|
@@ -24,7 +24,7 @@ last_reviewed: 2026-08-04
 | Layered Architecture | ✅ Complete |
 | Repository Pattern | ✅ Complete |
 | Domain Models | ✅ Complete |
-| ERPNext Integration | ⏳ Planned |
+| ERPNext REST foundation | 🚧 In progress — milestones 5.1 and 5.2 complete |
 | Multi-Agent Support | ⏳ Planned |
 
 ---
@@ -156,6 +156,9 @@ ERPNextAgent/
 │
 ├── repositories/
 │
+├── clients/
+│   └── erpnext_rest_client.py
+│
 ├── models/
 │
 ├── tests/
@@ -187,7 +190,13 @@ Service Layer
 Repository Layer
  │
  ▼
-ERPNext (Future)
+Repository implementation
+ │
+ ▼
+ERPNext REST Client
+ │
+ ▼
+ERPNext REST API
 ```
 
 Each layer has a clearly defined responsibility.
@@ -199,6 +208,7 @@ Each layer has a clearly defined responsibility.
 | tools | AI interface |
 | services | Business logic |
 | repositories | Data access |
+| clients | HTTP transport, session/authentication setup, and response parsing |
 | models | Domain objects |
 
 ---
@@ -224,8 +234,8 @@ Each layer has a clearly defined responsibility.
 | Sprint 2 – Custom Tools | ✅ Complete |
 | Sprint 3 – Interactive Application | ✅ Complete |
 | Sprint 4 – Repository Pattern | ✅ Complete |
-| Sprint 5 – ERPNext REST Integration | Planned |
-| Sprint 6 – Authentication & Session Management | Planned |
+| Sprint 5 – ERPNext REST Integration | 🚧 In progress — 5.1 and 5.2 complete |
+| Sprint 6 – Observability | Planned |
 | Sprint 7 – Advanced ERP Operations | Planned |
 | Sprint 8 – Multi-Agent Architecture | Planned |
 
@@ -278,6 +288,11 @@ Example:
 
 ```text
 GEMINI_API_KEY=your_api_key
+ERPNEXT_URL=https://your-erpnext-instance
+ERPNEXT_API_KEY=your_erpnext_api_key
+ERPNEXT_API_SECRET=your_erpnext_api_secret
+# Optional; otherwise the first visible Company is used
+ERPNEXT_COMPANY=your-company-name
 ```
 
 ---
@@ -347,12 +362,20 @@ Business rules belong inside the Service layer.
 
 Repositories abstract data access.
 
-Today:
+For the Company capability today:
 
 ```text
 Repository
     ↓
-Mock Data
+MockCompanyRepository (when ERPNEXT_URL is unset)
+
+or
+
+ERPNextCompanyRepository
+    ↓
+ERPNextRESTClient
+    ↓
+ERPNext REST API
 ```
 
 Future:
@@ -410,34 +433,19 @@ Service
 Repository
    │
    ▼
-Mock Data
+CompanyRepository contract
+   │
+   ├── MockCompanyRepository
+   └── ERPNextCompanyRepository
+          │
+          ▼
+   ERPNextRESTClient
+          │
+          ▼
+   ERPNext REST API
 ```
 
-Future architecture:
-
-```text
-User
-   │
-   ▼
-Antigravity Agent
-   │
-   ▼
-Tool
-   │
-   ▼
-Service
-   │
-   ▼
-Repository
-   │
-   ▼
-ERPNext REST API
-   │
-   ▼
-ERPNext Server
-```
-
-The migration from mock data to ERPNext should require changes only in the Repository layer.
+The Company Service and Tool use the same capability regardless of implementation. Customer remains mock-backed in this increment.
 
 ---
 
@@ -453,7 +461,7 @@ Planned enhancements include:
 - Purchase Orders
 - Inventory
 - Finance
-- Logging
+- OpenTelemetry-based observability (deferred to Sprint 6)
 - Unit Testing
 - Integration Testing
 - Memory

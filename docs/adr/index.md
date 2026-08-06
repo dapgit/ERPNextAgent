@@ -2,12 +2,12 @@
 title: Architecture Decision Records
 status: active
 audience: contributors
-last_reviewed: 2026-08-04
+last_reviewed: 2026-08-06
 ---
 
 # Architecture Decision Records
 
-ADRs capture the architectural decisions evidenced through Sprint 4. They describe the current documented design, not future implementation commitments.
+ADRs capture architectural decisions evidenced through the current implementation. Sprint 5.1 and 5.2 add the client boundary and establish REST as the first transport while retaining MCP as a later option.
 
 | ADR | Decision | Status | Sprint |
 | --- | --- | --- | --- |
@@ -18,12 +18,16 @@ ADRs capture the architectural decisions evidenced through Sprint 4. They descri
 | [0005](0005-documentation-first-governance.md) | Govern documentation alongside delivery | Accepted | 1–4 |
 | [0006](0006-repository-abstraction.md) | Isolate data access behind repositories | Accepted | 4 |
 | [0007](0007-domain-models.md) | Use domain models at layer boundaries | Accepted | 4 |
+| [0008](0008-client-layer.md) | Introduce an entity-agnostic client layer | Accepted | 5.1 |
+| [0009](0009-rest-first-mcp-later.md) | Use ERPNext REST first; defer MCP | Accepted | 5.1 |
+| [0010](0010-observability-deferred-to-sprint-6.md) | Defer OpenTelemetry to Sprint 6 | Accepted | 5.2 |
 
 ## Revision history
 
 | Date | Change |
 | --- | --- |
 | 2026-08-04 | Created ADR index and normalized the documented decision set. |
+| 2026-08-06 | Added Sprint 5 integration and observability decisions. |
 
 ---
 

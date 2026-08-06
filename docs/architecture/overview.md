@@ -2,414 +2,98 @@
 title: Architecture Overview
 status: active
 audience: contributors
-last_reviewed: 2026-08-04
+last_reviewed: 2026-08-06
 ---
 
 # Architecture Overview
 
-## Introduction
+Sprint 5 has introduced the first live ERPNext integration path without changing the Agent, Tool, or Service contracts. The Company path now chooses either a mock repository or an ERPNext REST-backed repository at application initialization.
 
-ERPNextAgent is designed as a layered enterprise application that uses Google's Antigravity SDK to provide AI-powered interactions with ERPNext.
+## Current dependency flow
 
-The architecture emphasizes:
-
-- Separation of Concerns
-- Single Responsibility Principle
-- Maintainability
-- Testability
-- Extensibility
-
-Rather than embedding business logic inside AI tools, the application separates responsibilities into clearly defined layers. This allows the AI layer to remain independent of the underlying ERP implementation.
-
----
-
-# Architecture Goals
-
-The architecture has the following objectives:
-
-1. Keep AI-specific code isolated.
-2. Separate business logic from tool definitions.
-3. Allow the backend implementation to change without affecting AI capabilities.
-4. Support future ERPNext integration with minimal code changes.
-5. Make every layer independently testable.
-
----
-
-# High-Level Architecture
-
-```text
-+----------------------+
-|        User          |
-+----------+-----------+
-           |
-           v
-+----------------------+
-|  Antigravity Agent   |
-+----------+-----------+
-           |
-           v
-+----------------------+
-|      Tool Layer      |
-+----------+-----------+
-           |
-           v
-+----------------------+
-|    Service Layer     |
-+----------+-----------+
-           |
-           v
-+----------------------+
-|   Repository Layer   |
-+----------+-----------+
-           |
-           v
-+----------------------+
-| Mock Data / ERPNext  |
-+----------------------+
+```mermaid
+flowchart TD
+  U[User] --> A[Antigravity Agent]
+  A --> T[Tool]
+  T --> S[Service]
+  S --> C[CompanyRepository contract]
+  C --> M[MockCompanyRepository]
+  C --> R[ERPNextCompanyRepository]
+  R --> H[ERPNextRESTClient]
+  H --> E[ERPNext REST API]
 ```
 
----
+`_create_repository()` selects `ERPNextCompanyRepository` when `ERPNEXT_URL` is configured; otherwise it selects `MockCompanyRepository`. Both fulfil `CompanyRepository`, so the service invokes the same `get_company_information()` capability in either case.
 
-# Layer Responsibilities
+## Layer responsibilities
 
-## User
+| Layer | Current responsibility |
+| --- | --- |
+| `app.py` / `config.py` | Compose and start the application and Agent runtime. |
+| `tools/` | Provide model-facing functions and format responses. |
+| `services/` | Coordinate application capabilities and return domain objects. |
+| `repositories/` | Define entity-level contracts, choose/make data access implementations, and map ERPNext data into domain models. |
+| `clients/` | Own HTTP details: session, authentication header, URL construction, timeout, response parsing, and transport error translation. |
+| `models/` | Represent application domain objects such as `Company`. |
 
-The user interacts with the application using the command-line interface.
+The client does not know business entities. Conversely, repositories do not construct URLs or call `requests` directly.
 
-Responsibilities:
+## Company REST request walkthrough
 
-- Ask business questions
-- Provide parameters
-- Receive formatted responses
-
----
-
-## Antigravity Agent
-
-The Antigravity Agent is responsible for:
-
-- Receiving user prompts
-- Understanding intent
-- Selecting tools
-- Invoking tools
-- Returning responses
-
-The agent never contains ERP business logic.
-
----
-
-## Tool Layer
-
-The Tool Layer exposes capabilities to the language model.
-
-Examples:
-
-- Get Company Information
-- Get Customer Information
-
-Responsibilities:
-
-- Accept parameters
-- Validate basic input
-- Delegate to the Service Layer
-- Format the response
-
-The Tool Layer should remain intentionally thin.
-
----
-
-## Service Layer
-
-The Service Layer contains business rules.
-
-Examples:
-
-- Validation
-- Workflow coordination
-- Business calculations
-- Authorization (future)
-
-Responsibilities:
-
-- Coordinate repositories
-- Apply business rules
-- Prepare domain objects
-
-The Service Layer must not contain data access code.
-
----
-
-## Repository Layer
-
-The Repository Layer abstracts data access.
-
-Current implementation:
-
-```text
-Repository
-    ↓
-Mock Data
+```mermaid
+sequenceDiagram
+  participant T as Company tool
+  participant S as Company service
+  participant R as ERPNextCompanyRepository
+  participant C as ERPNextRESTClient
+  participant E as ERPNext
+  T->>S: get_company_information()
+  S->>R: get_company_information()
+  alt ERPNEXT_COMPANY is configured
+    R->>C: get_doc("Company", name)
+  else no company configured
+    R->>C: get_list("Company")
+    C-->>R: first visible name
+    R->>C: get_doc("Company", name)
+  end
+  C->>E: authenticated GET
+  E-->>C: JSON response
+  C-->>R: parsed response or typed integration error
+  R-->>S: Company domain model
+  S-->>T: Company
 ```
 
-Future implementation:
+The REST client uses one `requests.Session`, sets `Authorization: token <key>:<secret>` and `Accept: application/json` once, then maps timeout, connection, authentication/authorization, missing-resource, validation, and unexpected-response cases to project exceptions. It also supports `with ERPNextRESTClient() as client:` for explicit session cleanup.
 
-```text
-Repository
-    ↓
-ERPNext REST API
-```
+## Dependency injection and testing
 
-Only the repository should know how data is retrieved.
+`ERPNextCompanyRepository` accepts an optional `ERPNextRESTClient` and optional company name. Tests inject a fake client, which validates JSON-to-domain mapping and fallback selection without a network connection. The client test suite separately verifies session reuse and URL construction; its live connectivity check skips unless `ERPNEXT_URL` is configured.
 
----
+## Boundaries and current limits
 
-## Domain Models
+- The Company repository is the only REST-backed repository currently implemented. Customer data remains mock-backed.
+- There is no generic repository factory yet; the Company module owns its temporary selection logic.
+- Retries, write methods, structured logging, metrics, and tracing are outside current implementation scope.
+- `fiscal_year` and `industry` are not Company DocType fields in the current mapping, so missing values are represented as `Not tracked on Company in ERPNext`.
 
-Repositories return domain objects rather than dictionaries.
+## Future evolution
 
-Example:
+MCP is a planned alternative transport, not a dependency of the current path. A future MCP-backed repository/client must satisfy the existing repository-facing capability without requiring Service or Tool changes. See [ADR 0009](../adr/0009-rest-first-mcp-later.md).
 
-```python
-@dataclass
-class Customer:
-    name: str
-    territory: str
-    customer_group: str
-```
+OpenTelemetry was evaluated during Sprint 5 and deferred to Sprint 6. The new client boundary is the preferred initial instrumentation point because it centralizes outbound ERPNext calls. See [ADR 0010](../adr/0010-observability-deferred-to-sprint-6.md).
 
-Benefits:
+## Related documentation
 
-- Type safety
-- Readability
-- IDE support
-- Easier testing
-
----
-
-# Request Flow
-
-The following sequence illustrates a typical request.
-
-```text
-User
- │
- │ "Get customer ABC Traders"
- ▼
-Antigravity Agent
- │
- ▼
-Customer Tool
- │
- ▼
-Customer Service
- │
- ▼
-Customer Repository
- │
- ▼
-Mock Data / ERPNext
- │
- ▲
- │ Customer
- │
-Customer Service
- │
- ▲
- │
-Customer Tool
- │
- ▲
- │
-Antigravity Agent
- │
- ▲
- │
-User
-```
-
----
-
-# Dependency Direction
-
-Dependencies flow in one direction only.
-
-```text
-app.py
-    │
-    ▼
-Agent
-    │
-    ▼
-Tool
-    │
-    ▼
-Service
-    │
-    ▼
-Repository
-```
-
-No layer should depend on a higher layer.
-
-Examples of invalid dependencies:
-
-- Repository → Service
-- Service → Tool
-- Repository → Tool
-
-Maintaining one-way dependencies improves maintainability and reduces coupling.
-
----
-
-# Architectural Principles
-
-The project follows several architectural principles.
-
-## Single Responsibility Principle
-
-Every module has one reason to change.
-
----
-
-## Dependency Inversion
-
-Higher layers depend on abstractions rather than implementation details.
-
----
-
-## Separation of Concerns
-
-Each layer has a clearly defined purpose.
-
----
-
-## Thin Tools
-
-AI tools should not contain business logic.
-
----
-
-## Repository Pattern
-
-Repositories abstract data access from business logic.
-
----
-
-## Documentation First
-
-Architecture changes are documented before a sprint is considered complete.
-
----
-
-# Evolution of the Architecture
-
-## Sprint 1
-
-```text
-User
-   │
-Agent
-```
-
----
-
-## Sprint 2
-
-```text
-User
-   │
-Agent
-   │
-Tool
-```
-
----
-
-## Sprint 3
-
-```text
-User
-   │
-Agent
-   │
-Tool
-   │
-Configuration
-```
-
----
-
-## Sprint 4
-
-```text
-User
-   │
-Agent
-   │
-Tool
-   │
-Service
-   │
-Repository
-```
-
----
-
-## Sprint 5 (Planned)
-
-```text
-User
-   │
-Agent
-   │
-Tool
-   │
-Service
-   │
-ERP Repository
-   │
-ERPNext REST API
-```
-
-Notice that the Tool and Service layers remain unchanged while only the Repository implementation changes.
-
-This demonstrates the primary architectural goal of isolating data access behind a dedicated abstraction.
-
----
-
-# Future Enhancements
-
-The architecture is designed to support future additions without major refactoring.
-
-Planned enhancements include:
-
-- Authentication Layer
-- Logging
-- Caching
-- Retry Policies
-- Memory
-- Multi-Agent Collaboration
-- MCP Integration
-- Unit and Integration Testing
-
-These additions will extend the existing architecture rather than replace it.
-
----
-
-# Summary
-
-ERPNextAgent follows a layered architecture that separates AI interaction, business logic, and data access.
-
-By maintaining clear boundaries between layers, the application remains easy to understand, test, maintain, and extend.
-
-This architecture provides a solid foundation for integrating ERPNext while preserving the simplicity of the AI tooling layer.
-
+- [Layered architecture](layered-architecture.md)
+- [Repository layer](repository-layer.md)
+- [ERPNext REST integration architecture](future-erpnext.md)
+- [Sprint 5 journal](../journal/sprint-05-erpnext-rest-foundation.md)
 
 ## Revision history
 
 | Date | Change |
 | --- | --- |
-| 2026-08-04 | Added metadata, documentation navigation, and revision history. |
+| 2026-08-06 | Replaced Sprint 4 planning-era architecture with the implemented Sprint 5.1–5.2 design. |
 
 ---
 

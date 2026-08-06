@@ -2,7 +2,7 @@
 title: Learning Path
 status: active
 audience: contributors
-last_reviewed: 2026-08-04
+last_reviewed: 2026-08-06
 ---
 
 # Learning Path
@@ -78,12 +78,15 @@ Learn:
 - Repository Implementation
 - Error Handling
 
+Completed so far: the REST client, Company repository contract and REST adapter, environment-backed configuration, typed errors, and unit-testable dependency injection. Customer remains mock-backed.
+
 ---
 
 # Phase 6 – Advanced AI
 
 Future learning includes:
 
+- OpenTelemetry observability (Sprint 6; deferred from Sprint 5)
 - Memory
 - MCP
 - Multi-Agent Systems
@@ -98,6 +101,7 @@ Use the [roadmap](project-roadmap.md) for delivery status, [sprint journals](jou
 | Date | Change |
 | --- | --- |
 | 2026-08-04 | Added metadata, delivery-record links, and revision history. |
+| 2026-08-06 | Recorded the completed Sprint 5.1–5.2 learning outcomes and observability deferral. |
 
 ---
 

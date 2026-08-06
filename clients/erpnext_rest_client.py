@@ -1,5 +1,4 @@
 import json
-import time
 from typing import Any, Dict, List, Optional
 
 import requests
@@ -13,11 +12,8 @@ from utils.exceptions import (
     ERPNextTimeoutError,
     ERPNextValidationError,
 )
-from utils.logger import get_logger
 
 DEFAULT_TIMEOUT_SECONDS = 10
-
-logger = get_logger(__name__)
 
 
 class ERPNextRESTClient:
@@ -92,22 +88,13 @@ class ERPNextRESTClient:
             ERPNextResponseError: Any other error status or invalid JSON.
         """
         url = self._build_url(path)
-        logger.info("ERPNext request: GET %s", path)
-        start = time.perf_counter()
 
         try:
             response = self._session.get(url, params=params, timeout=self._timeout)
         except requests.exceptions.Timeout as exc:
-            logger.error("ERPNext request timed out: GET %s", path)
             raise ERPNextTimeoutError(f"Timed out calling {url}") from exc
         except requests.exceptions.RequestException as exc:
-            logger.error("ERPNext request failed: GET %s (%s)", path, exc)
             raise ERPNextConnectionError(f"Failed to reach {url}: {exc}") from exc
-
-        duration_ms = (time.perf_counter() - start) * 1000
-        logger.info(
-            "ERPNext response: %s GET %s in %.0fms", response.status_code, path, duration_ms
-        )
 
         return self._parse_response(response, url)
 

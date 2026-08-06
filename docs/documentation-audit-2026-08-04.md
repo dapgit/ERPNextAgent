@@ -2,7 +2,7 @@
 title: Documentation Audit — 2026-08-04
 status: active
 audience: maintainers
-last_reviewed: 2026-08-04
+last_reviewed: 2026-08-06
 ---
 
 # Documentation Audit — 2026-08-04
@@ -13,7 +13,7 @@ Reviewed the README, changelog, contribution guide, project/architecture documen
 
 ## Result
 
-**In progress — Sprint 4 documentation is not approved for closure.** The documentation has a single entry point, consistent navigation, ADR coverage for the decisions evidenced through Sprint 4, and chapter-based handbook structures. However, the sprint journals and several inherited ADRs still require expansion to meet the agreed reference-documentation depth.
+**In progress — Sprint 5 is not approved for closure.** The documentation has a single entry point, consistent navigation, ADR coverage for the implemented client/repository boundary, and a recorded Sprint 5.1–5.2 delivery slice. The sprint remains open because only the Company path is REST-backed and controlled live integration evidence is still required.
 
 ## Documentation inventory
 
@@ -33,6 +33,9 @@ Reviewed the README, changelog, contribution guide, project/architecture documen
 - Made the ERPNext guide explicitly planned and provided a completion checklist.
 - Added diagrams for navigation, runtime request flow, target integration boundary, and contribution flow.
 - Added metadata, revision history, and navigation to every new or materially revised document.
+- Recorded Sprint 5.1–5.2 in the journal, changelog, architecture, roadmap, README, and ERPNext handbook.
+- Added ADRs for the client layer, REST-first/MCP-later decision, and the OpenTelemetry deferral.
+- Updated navigation so Sprint 4 leads to Sprint 5 and the indexes identify the current in-progress scope.
 
 ## Remaining gaps
 
@@ -40,7 +43,7 @@ Reviewed the README, changelog, contribution guide, project/architecture documen
 | --- | --- | --- |
 | High | Sprint journal depth | Expand Sprints 1–4 with diagrams, code walkthroughs, review findings, common mistakes, and verification evidence before approval. |
 | High | ADR template normalization | Add explicit Status, Problem, Options, Rationale, and Future Work sections to ADR 0001–0005. |
-| High | Sprint 5 implementation | Adapter, authentication design, error model, tests, journal, and changelog update. |
+| High | Sprint 5 completion | Migrate remaining intended repositories and record controlled live integration evidence. |
 | Medium | Automated test documentation | Test command, coverage expectations, and CI evidence once a test suite exists. |
 | Medium | ERPNext operational contract | Approved DocTypes, permissions, version, endpoint rules, and secret-management policy. |
 | Blocked | Public-release license | A maintainer must select the intended software license before a legally meaningful `LICENSE.md` can be added. |
@@ -48,8 +51,8 @@ Reviewed the README, changelog, contribution guide, project/architecture documen
 ## Link and status checks
 
 - New internal links use repository-relative Markdown paths.
-- Sprints 1–4 are marked completed; Sprints 5–10 are marked planned.
-- ADRs are limited to decisions supported by existing project records.
+- Sprints 1–4 are marked completed; Sprint 5 is in progress with milestones 5.1–5.2 complete; Sprints 6–10 remain planned.
+- ADRs are limited to decisions supported by implementation or explicit Sprint 5 evaluation records.
 - The documentation remains explicitly incomplete until the high-priority expansion work is closed.
 
 ## Revision history
@@ -58,6 +61,7 @@ Reviewed the README, changelog, contribution guide, project/architecture documen
 | --- | --- |
 | 2026-08-04 | Initial documentation baseline audit. |
 | 2026-08-04 | Reopened closure status; recorded handbook/ADR/architecture repairs and remaining approval blockers. |
+| 2026-08-06 | Consistency review after Sprint 5.1–5.2 documentation update; revised status, navigation, and remaining gaps. |
 
 ---
 

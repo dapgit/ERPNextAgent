@@ -2,12 +2,12 @@
 title: Sprint Journals
 status: active
 audience: contributors
-last_reviewed: 2026-08-04
+last_reviewed: 2026-08-06
 ---
 
 # Sprint Journals
 
-The journals record outcomes for completed sprints only. Sprints 5–10 remain planned on the [roadmap](../project-roadmap.md) until work and verification evidence exist.
+The journals record implementation evidence. Sprint 5 is in progress; its first two milestones are documented without claiming that the whole sprint is complete.
 
 | Sprint | Focus | Status | Journal |
 | --- | --- | --- | --- |
@@ -15,13 +15,15 @@ The journals record outcomes for completed sprints only. Sprints 5–10 remain p
 | 2 | Custom tools | Completed | [Read](sprint-02-custom-tools.md) |
 | 3 | Interactive application | Completed | [Read](sprint-03-interactive-application.md) |
 | 4 | Repository pattern | Completed | [Read](sprint-04-repository-pattern.md) |
-| 5–10 | Integration and future capabilities | Planned | [Roadmap](../project-roadmap.md) |
+| 5 | ERPNext REST foundation | In progress — 5.1 and 5.2 complete | [Read](sprint-05-erpnext-rest-foundation.md) |
+| 6–10 | Future capabilities | Planned | [Roadmap](../project-roadmap.md) |
 
 ## Revision history
 
 | Date | Change |
 | --- | --- |
 | 2026-08-04 | Created journal index and completed-sprint navigation. |
+| 2026-08-06 | Added the Sprint 5.1–5.2 journal and clarified in-progress status. |
 
 ---
 

@@ -1,56 +1,61 @@
 ---
-title: Future ERPNext Integration Architecture
-status: planned
+title: ERPNext REST Integration Architecture
+status: in-progress
 audience: contributors
-last_reviewed: 2026-08-04
+last_reviewed: 2026-08-06
 ---
 
-# Future ERPNext Integration Architecture
+# ERPNext REST Integration Architecture
 
-## Purpose
+Sprint 5.1 and 5.2 establish the first operational integration slice: read Company information through ERPNext REST while preserving the existing Tool and Service path.
 
-This document defines the architectural boundary for Sprint 5. It describes the intended integration shape and acceptance evidence; it does not claim that a live ERPNext connection exists.
-
-## Target design
+## Implemented boundary
 
 ```mermaid
 flowchart TD
   A[Antigravity agent] --> T[Tool]
   T --> S[Service]
-  S --> P[Repository contract]
-  P --> R[ERPNext repository — planned]
-  R --> C[HTTP client — planned]
+  S --> P[CompanyRepository contract]
+  P --> M[MockCompanyRepository]
+  P --> R[ERPNextCompanyRepository]
+  R --> C[ERPNextRESTClient]
   C --> E[ERPNext REST API]
 ```
 
-The tool and service contracts must remain unchanged when mock repositories are replaced. The ERPNext repository owns request construction, response mapping, transport failures, and conversion to domain errors. Services remain responsible for business policy; tools remain responsible for model-facing input and output.
+The client owns `requests.Session`, token authentication headers, URL construction, GET execution, JSON parsing, timeout, and HTTP error conversion. The REST repository owns Company lookup and mapping, not HTTP mechanics.
 
-## Integration rules
+## Configuration
 
-- Store endpoints and secrets outside source control.
-- Use explicit timeouts and bounded retries only where an operation is safe to retry.
-- Never log authorization headers, tokens, or full sensitive payloads.
-- Convert external response shapes into domain models at the repository boundary.
-- Distinguish authentication, authorization, validation, missing-record, transport, and unexpected-response errors.
-- Start with least-privilege, read-only access and controlled test data.
+| Variable | Purpose |
+| --- | --- |
+| `ERPNEXT_URL` | Enables the REST-backed Company repository and supplies its base URL. |
+| `ERPNEXT_API_KEY` / `ERPNEXT_API_SECRET` | Supply ERPNext token credentials. Do not commit them. |
+| `ERPNEXT_COMPANY` | Optional Company document name; otherwise the first visible Company is used. |
 
-## Completion evidence
+## Security and error behavior
 
-Sprint 5 cannot be marked complete until the project has an approved authentication decision, a configured client, repository mapping tests, controlled integration-test evidence, user-safe error handling, and updated delivery documentation.
+Use least-privilege credentials and keep secrets out of source control and diagnostics. The integration distinguishes authentication/authorization (401/403), not found (404), validation (400/417), timeout, connection, and unexpected response/JSON errors through `ERPNextError` subclasses.
 
-## Related documents
+## Remaining Sprint 5 work
 
-- [ERPNext integration handbook](../erpnext/handbook.md)
-- [Repository layer](repository-layer.md)
-- [ADR index](../adr/index.md)
-- [Sprint 5 roadmap](../project-roadmap.md)
+- Migrate other entity repositories only after their contracts and mappings are defined.
+- Gather controlled live integration evidence rather than treating an environment-dependent skipped test as proof.
+- Decide resilience features such as retries after concrete operation requirements are known.
+
+## Future transport option
+
+MCP is planned as an alternative integration route behind repository contracts. It is not part of Sprint 5’s runtime. Direct REST comes first to establish endpoint, authentication, mapping, and failure behavior under project control. See [ADR 0009](../adr/0009-rest-first-mcp-later.md).
+
+## Observability
+
+OpenTelemetry is intentionally deferred to Sprint 6. The REST client creates a single natural location for future outbound spans, but no tracer, exporter, or instrumentation package is currently installed or active. See [ADR 0010](../adr/0010-observability-deferred-to-sprint-6.md).
 
 ## Revision history
 
 | Date | Change |
 | --- | --- |
-| 2026-08-04 | Added the planned ERPNext integration architecture boundary. |
+| 2026-08-06 | Replaced planned design with implemented Sprint 5.1–5.2 boundary and remaining scope. |
 
 ---
 
-Previous: [Repository layer](repository-layer.md) · Back to the [documentation index](../index.md)
+Previous: [Repository layer](repository-layer.md) · Back to the [documentation index](../index.md).
