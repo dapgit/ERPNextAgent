@@ -30,9 +30,18 @@ class ERPNextClient:
         timeout: int = DEFAULT_TIMEOUT_SECONDS,
     ):
         self._base_url = (base_url or get_erpnext_url() or "").rstrip("/")
-        self._api_key = api_key or get_erpnext_api_key()
-        self._api_secret = api_secret or get_erpnext_api_secret()
         self._timeout = timeout
+
+        api_key = api_key or get_erpnext_api_key()
+        api_secret = api_secret or get_erpnext_api_secret()
+
+        self._session = requests.Session()
+        self._session.headers.update(
+            {
+                "Authorization": f"token {api_key}:{api_secret}",
+                "Accept": "application/json",
+            }
+        )
 
     def get(self, path: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
@@ -53,12 +62,7 @@ class ERPNextClient:
         url = self._build_url(path)
 
         try:
-            response = requests.get(
-                url,
-                headers=self._auth_headers(),
-                params=params,
-                timeout=self._timeout,
-            )
+            response = self._session.get(url, params=params, timeout=self._timeout)
         except requests.exceptions.Timeout as exc:
             raise ERPNextConnectionError(f"Timed out calling {url}") from exc
         except requests.exceptions.RequestException as exc:
@@ -66,14 +70,17 @@ class ERPNextClient:
 
         return self._parse_response(response, url)
 
+    def close(self) -> None:
+        self._session.close()
+
+    def __enter__(self) -> "ERPNextClient":
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
+        self.close()
+
     def _build_url(self, path: str) -> str:
         return f"{self._base_url}/{path.lstrip('/')}"
-
-    def _auth_headers(self) -> Dict[str, str]:
-        return {
-            "Authorization": f"token {self._api_key}:{self._api_secret}",
-            "Accept": "application/json",
-        }
 
     def _parse_response(self, response: requests.Response, url: str) -> Dict[str, Any]:
         if response.status_code in (401, 403):
