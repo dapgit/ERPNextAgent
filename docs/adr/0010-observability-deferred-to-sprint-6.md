@@ -45,4 +45,4 @@ Defer OpenTelemetry implementation to Sprint 6. Treat it as observability—not 
 
 ---
 
-Previous: [ADR 0009](0009-rest-first-mcp-later.md) · Back to the [ADR index](index.md).
+Previous: [ADR 0009](0009-rest-first-mcp-later.md) · Back to the [ADR index](index.md) · Next: [ADR 0011](0011-structured-logging-and-correlation-ids.md)

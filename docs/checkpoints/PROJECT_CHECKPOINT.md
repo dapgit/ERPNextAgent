@@ -2,7 +2,7 @@
 
     Checkpoint Date: 07-Aug-2026
 
-    Current Sprint: Sprint 5 (Complete)
+    Current Sprint: Sprint 6 (Milestone 6.1 Complete)
 
     Project Status: Active Development
 
@@ -53,7 +53,7 @@ Current Status
 
 Current Sprint:
 
-Sprint 5
+Sprint 6
 
 Completed:
 
@@ -73,10 +73,11 @@ Completed:
     Sprint 5.5
     Sprint 5.6
     Sprint 5.7
+    Sprint 6.1
 
 Active Milestone:
 
-Sprint 6 – Observability
+Sprint 6.3 – OpenTelemetry (next), then Metrics (6.4) and Documentation (6.5). Sprint 6.2 (Correlation IDs) was folded into 6.1's design and implementation — see ADR-0011.
 Technology Stack
 
 Python 3.12
@@ -482,7 +483,11 @@ Documentation should evolve alongside implementation.
 Small, reviewable sprints reduce architectural risk.
 Current Milestone
 
-Sprint 5 (complete) — Company, Customer, Item, Error Handling
+Sprint 6.1 (complete) — Structured Logging and Correlation IDs
+
+ADR-0011 defines the design: JSON or text log output (configurable, defaulting to text for the interactive CLI), a schema with fields derived automatically from the standard LogRecord where possible (layer, operation, exception) rather than passed manually at each call site, a contextvars-based correlation ID generated once per user turn in app.py, and a logging.Filter that injects it into every record with no changes to any Tool/Service/Repository/Client signature. Verified against the Antigravity SDK: asyncio.to_thread (which the SDK uses to run sync tool functions) copies the contextvars context, so the correlation ID propagates correctly through real tool calls. Tool and Service logging did not exist before this milestone and was added; Repository and Client logging were updated to carry entity/duration_ms as structured fields.
+
+Next: Sprint 6.3 — OpenTelemetry instrumentation on top of this foundation (Sprint 6.2, Correlation IDs, was folded into 6.1).
 
 Completed Sprint 5 follow-up work:
 
@@ -538,7 +543,7 @@ When resuming this project:
 
     Preserve the current architecture.
 
-    Continue from Sprint 6 (Observability).
+    Continue from Sprint 6.3 (OpenTelemetry), building on the Sprint 6.1 logging/correlation foundation.
 
     Update documentation alongside implementation.
 
@@ -564,6 +569,6 @@ Documentation Depth: 8.5 / 10
 
 Overall Project Health: 9.3 / 10
 
-Sprint 5 is complete. The project is in a healthy state and is ready to continue with Sprint 6.
+Sprint 5 is complete, and Sprint 6.1 (structured logging and correlation IDs) is complete. The project is in a healthy state and is ready to continue with Sprint 6.3 (OpenTelemetry).
 
 The primary focus going forward should be expanding ERPNext functionality while continuing to improve the depth and quality of the documentation without compromising the architectural principles established in Sprints 1–5.

@@ -51,3 +51,14 @@ def get_log_level():
         str: The logging level name, defaulting to "INFO".
     """
     return os.getenv("LOG_LEVEL", "INFO")
+
+
+def get_log_format():
+    """
+    Retrieve the logging output format from environment variables.
+
+    Returns:
+        str: "text" (default, human-readable, for local/interactive use)
+        or "json" (structured, for aggregated/production use). See ADR-0011.
+    """
+    return os.getenv("LOG_FORMAT", "text")

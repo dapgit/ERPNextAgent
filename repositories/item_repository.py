@@ -27,7 +27,7 @@ class ERPNextItemRepository(ItemRepository):
 
     def get_item(self, item_code: str) -> Optional[Item]:
         code = item_code.strip()
-        logger.info("Looking up Item '%s' in ERPNext", code)
+        logger.info("Looking up Item '%s' in ERPNext", code, extra={"entity": "Item"})
 
         try:
             document = self._client.get_doc("Item", code)

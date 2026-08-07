@@ -1,5 +1,8 @@
 from services import customer_service
+from utils.logger import get_logger
 from utils.tool_execution import execute_tool
+
+logger = get_logger(__name__)
 
 
 def get_customer(customer_name: str) -> str:
@@ -15,6 +18,8 @@ def get_customer(customer_name: str) -> str:
         territory,
         customer type.
     """
+    logger.info("Handling get_customer request", extra={"entity": "Customer"})
+
     def _get_customer() -> str:
         customer = customer_service.get_customer(customer_name)
 
@@ -26,4 +31,6 @@ Customer Group: {customer.customer_group}
 Territory: {customer.territory}
 Customer Type: {customer.customer_type}"""
 
-    return execute_tool(_get_customer)
+    result = execute_tool(_get_customer)
+    logger.info("Completed get_customer request", extra={"entity": "Customer"})
+    return result

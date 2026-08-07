@@ -1,5 +1,8 @@
 from services import company_service
+from utils.logger import get_logger
 from utils.tool_execution import execute_tool
+
+logger = get_logger(__name__)
 
 
 def get_company_information() -> str:
@@ -9,6 +12,8 @@ def get_company_information() -> str:
     Returns:
         str: A string containing the company information.
     """
+    logger.info("Handling get_company_information request", extra={"entity": "Company"})
+
     def _get_company_information() -> str:
         company = company_service.get_company_information()
 
@@ -22,4 +27,6 @@ Fiscal Year : {company.fiscal_year}
 
 Industry : {company.industry}"""
 
-    return execute_tool(_get_company_information)
+    result = execute_tool(_get_company_information)
+    logger.info("Completed get_company_information request", extra={"entity": "Company"})
+    return result

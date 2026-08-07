@@ -27,7 +27,9 @@ class ERPNextCustomerRepository(CustomerRepository):
 
     def get_customer(self, customer_name: str) -> Optional[Customer]:
         name = customer_name.strip()
-        logger.info("Looking up Customer '%s' in ERPNext", name)
+        logger.info(
+            "Looking up Customer '%s' in ERPNext", name, extra={"entity": "Customer"}
+        )
 
         try:
             document = self._client.get_doc("Customer", name)

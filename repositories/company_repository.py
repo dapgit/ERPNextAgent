@@ -32,7 +32,9 @@ class ERPNextCompanyRepository(CompanyRepository):
 
     def get_company_information(self) -> Company:
         company_name = self._company_name or self._first_available_company_name()
-        logger.info("Fetching Company '%s' from ERPNext", company_name)
+        logger.info(
+            "Fetching Company '%s' from ERPNext", company_name, extra={"entity": "Company"}
+        )
         document = self._client.get_doc("Company", company_name)
         return self._to_domain(document["data"])
 

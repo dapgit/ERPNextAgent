@@ -4,6 +4,7 @@ import asyncio
 #from google.antigravity import Agent, LocalAgentConfig
 
 from agent.assistant import create_agent
+from observability.correlation import begin_correlation
 
 
 #load_dotenv()
@@ -32,6 +33,7 @@ async def chat_loop(local_agent):
         if question.lower() in ["exit", "quit"]:
             break
 
+        begin_correlation()
         response = await local_agent.chat(question)
         print(await response.text())
 

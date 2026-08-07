@@ -106,7 +106,11 @@ class ERPNextRESTClient:
 
         duration_ms = (time.perf_counter() - start) * 1000
         logger.info(
-            "ERPNext response: %s GET %s in %.0fms", response.status_code, path, duration_ms
+            "ERPNext response: %s GET %s in %.0fms",
+            response.status_code,
+            path,
+            duration_ms,
+            extra={"duration_ms": round(duration_ms, 1)},
         )
 
         return self._parse_response(response, url)

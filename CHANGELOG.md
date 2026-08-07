@@ -13,6 +13,25 @@ This project follows a sprint-based development approach. Each sprint represents
 
 ---
 
+# Sprint 6 – Observability (in progress)
+
+## Completed milestones
+
+### 6.1 — Structured logging and correlation IDs
+
+- Added [ADR-0011](docs/adr/0011-structured-logging-and-correlation-ids.md), covering log format, schema, correlation ID propagation, and per-layer logging ownership.
+- Added the `observability/` package: `observability/logging.py` (`TextFormatter` for local/interactive use, `JsonFormatter` for aggregated/production use) and `observability/correlation.py` (a `contextvars`-based correlation ID plus the `CorrelationFilter` that injects `correlation_id` and a derived `layer` into every log record).
+- Added `settings.get_log_format()` (`LOG_FORMAT=text|json`, defaulting to `text`); `utils/logger.py` now configures the formatter and filter centrally.
+- `app.py`'s `chat_loop` starts a new correlation ID per user turn; it propagates through `asyncio.to_thread` (confirmed against the Antigravity SDK's own tool-execution path) with no changes to any Tool/Service/Repository/Client method signature.
+- Added Tool-layer (request start/end) and Service-layer (orchestration) logging, which did not exist before this sprint; Repository and Client logging were updated to carry `entity`/`duration_ms` as structured fields instead of only free text.
+- Verified end-to-end: a single tool call now produces one shared `correlation_id` across the Tool, Service, Repository, and Client log lines; separate calls get distinct IDs.
+
+## Deferred
+
+- OpenTelemetry instrumentation (Sprint 6.3), metrics (Sprint 6.4), and the full observability documentation pass (Sprint 6.5) are not yet implemented.
+
+---
+
 # Sprint 5 – ERPNext REST Integration (complete)
 
 ## Completed milestones
