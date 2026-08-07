@@ -2,7 +2,7 @@
 
     Checkpoint Date: 07-Aug-2026
 
-    Current Sprint: Sprint 6 (Milestone 6.1 Complete)
+    Current Sprint: Sprint 6 (Milestones 6.1 and 6.3 Complete)
 
     Project Status: Active Development
 
@@ -74,10 +74,11 @@ Completed:
     Sprint 5.6
     Sprint 5.7
     Sprint 6.1
+    Sprint 6.3
 
 Active Milestone:
 
-Sprint 6.3 – OpenTelemetry (next), then Metrics (6.4) and Documentation (6.5). Sprint 6.2 (Correlation IDs) was folded into 6.1's design and implementation — see ADR-0011.
+Sprint 6.4 – Metrics (next), then Documentation (6.5). Sprint 6.2 (Correlation IDs) was folded into 6.1's design and implementation — see ADR-0011.
 Technology Stack
 
 Python 3.12
@@ -487,7 +488,11 @@ Sprint 6.1 (complete) — Structured Logging and Correlation IDs
 
 ADR-0011 defines the design: JSON or text log output (configurable, defaulting to text for the interactive CLI), a schema with fields derived automatically from the standard LogRecord where possible (layer, operation, exception) rather than passed manually at each call site, a contextvars-based correlation ID generated once per user turn in app.py, and a logging.Filter that injects it into every record with no changes to any Tool/Service/Repository/Client signature. Verified against the Antigravity SDK: asyncio.to_thread (which the SDK uses to run sync tool functions) copies the contextvars context, so the correlation ID propagates correctly through real tool calls. Tool and Service logging did not exist before this milestone and was added; Repository and Client logging were updated to carry entity/duration_ms as structured fields.
 
-Next: Sprint 6.3 — OpenTelemetry instrumentation on top of this foundation (Sprint 6.2, Correlation IDs, was folded into 6.1).
+Sprint 6.3 (complete) — OpenTelemetry Tracing
+
+ADR-0012 defines the design: opentelemetry-sdk and opentelemetry-instrumentation-requests added as explicit dependencies (only the transitive opentelemetry-api was present before); a ConsoleSpanExporter gated by settings.get_telemetry_enabled() (OTEL_ENABLED, default false), relying on OpenTelemetry's built-in no-op provider so disabling telemetry requires no conditional code anywhere; a traced() decorator applied to Service and Repository methods for Company, Customer, and Item, deriving span names from a function's module-qualified __qualname__; Tool-layer spans started inside the existing inner closures rather than via decorators on the public Tool functions (same signature-safety reasoning as ADR-0011); correlation_id attached as an attribute on the root span (started once per turn in app.py) rather than merged into the trace ID; and RequestsInstrumentor wiring so the REST client needed no code changes. Verified live, including through asyncio.to_thread, producing one trace across Tool → Service → Repository → auto-instrumented HTTP spans; a span-naming collision (bare __qualname__ made Tool- and Service-layer spans for the same operation indistinguishable) was found during verification and fixed by qualifying span names with the module path.
+
+Next: Sprint 6.4 — Metrics, then Sprint 6.5 — Documentation.
 
 Completed Sprint 5 follow-up work:
 
@@ -543,7 +548,7 @@ When resuming this project:
 
     Preserve the current architecture.
 
-    Continue from Sprint 6.3 (OpenTelemetry), building on the Sprint 6.1 logging/correlation foundation.
+    Continue from Sprint 6.4 (Metrics), building on the Sprint 6.1 logging/correlation and Sprint 6.3 tracing foundation.
 
     Update documentation alongside implementation.
 
@@ -569,6 +574,6 @@ Documentation Depth: 8.5 / 10
 
 Overall Project Health: 9.3 / 10
 
-Sprint 5 is complete, and Sprint 6.1 (structured logging and correlation IDs) is complete. The project is in a healthy state and is ready to continue with Sprint 6.3 (OpenTelemetry).
+Sprint 5 is complete, and Sprint 6.1 (structured logging and correlation IDs) and Sprint 6.3 (OpenTelemetry tracing) are complete. The project is in a healthy state and is ready to continue with Sprint 6.4 (Metrics).
 
 The primary focus going forward should be expanding ERPNext functionality while continuing to improve the depth and quality of the documentation without compromising the architectural principles established in Sprints 1–5.

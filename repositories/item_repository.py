@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional
 
 from clients.erpnext_rest_client import ERPNextRESTClient
 from models.item import Item
+from observability.telemetry import traced
 from utils.exceptions import ERPNextResourceNotFoundError
 from utils.logger import get_logger
 
@@ -25,6 +26,7 @@ class ERPNextItemRepository(ItemRepository):
     def __init__(self, client: Optional[ERPNextRESTClient] = None):
         self._client = client or ERPNextRESTClient()
 
+    @traced()
     def get_item(self, item_code: str) -> Optional[Item]:
         code = item_code.strip()
         logger.info("Looking up Item '%s' in ERPNext", code, extra={"entity": "Item"})

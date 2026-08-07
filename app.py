@@ -5,6 +5,9 @@ import asyncio
 
 from agent.assistant import create_agent
 from observability.correlation import begin_correlation
+from observability.telemetry import get_tracer
+
+tracer = get_tracer(__name__)
 
 
 #load_dotenv()
@@ -33,9 +36,11 @@ async def chat_loop(local_agent):
         if question.lower() in ["exit", "quit"]:
             break
 
-        begin_correlation()
-        response = await local_agent.chat(question)
-        print(await response.text())
+        with tracer.start_as_current_span("user_turn") as span:
+            correlation_id = begin_correlation()
+            span.set_attribute("correlation_id", correlation_id)
+            response = await local_agent.chat(question)
+            print(await response.text())
 
 
 async def main():

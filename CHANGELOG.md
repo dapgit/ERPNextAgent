@@ -26,9 +26,20 @@ This project follows a sprint-based development approach. Each sprint represents
 - Added Tool-layer (request start/end) and Service-layer (orchestration) logging, which did not exist before this sprint; Repository and Client logging were updated to carry `entity`/`duration_ms` as structured fields instead of only free text.
 - Verified end-to-end: a single tool call now produces one shared `correlation_id` across the Tool, Service, Repository, and Client log lines; separate calls get distinct IDs.
 
+### 6.3 — OpenTelemetry tracing
+
+- Added [ADR-0012](docs/adr/0012-opentelemetry-tracing.md), covering the exporter strategy, the `correlation_id`-as-span-attribute decision, and the shared `traced()` helper.
+- Added `opentelemetry-sdk` and `opentelemetry-instrumentation-requests` to `requirements.txt` — only the transitive `opentelemetry-api` (via `mcp`) was present before this milestone.
+- Added `observability/telemetry.py`: SDK initialization gated by the new `settings.get_telemetry_enabled()` (`OTEL_ENABLED`, default `false`) using a `ConsoleSpanExporter`; the `traced()` decorator, which derives span names from a function's module-qualified `__qualname__`; and `RequestsInstrumentor` wiring for the REST client's outbound HTTP calls.
+- Instrumented Company, Customer, and Item across Service and Repository methods (`@traced()`) and the Tool layer (spans started inside the existing inner closures, not via decorators on the public Tool functions — same signature-safety reasoning as ADR-0011).
+- `app.py`'s `chat_loop` starts one root span per user turn, alongside the existing correlation ID, and attaches `correlation_id` to it as a span attribute.
+- Verified live, including through `asyncio.to_thread` (the SDK's actual tool-execution path): a single call produces one trace spanning Tool → Service → Repository → auto-instrumented HTTP spans, and the app behaves identically — no console output at all — when telemetry is disabled (the default).
+- A naming collision was found and fixed during verification: a bare `__qualname__` produced identically-named Tool-layer and Service-layer spans for the same operation (both just `get_item`); span names are now module-qualified.
+
 ## Deferred
 
-- OpenTelemetry instrumentation (Sprint 6.3), metrics (Sprint 6.4), and the full observability documentation pass (Sprint 6.5) are not yet implemented.
+- Metrics (Sprint 6.4) and the full observability documentation pass (Sprint 6.5) are not yet implemented.
+- OTLP/collector export was deliberately deferred out of 6.3's scope — `ConsoleSpanExporter` is sufficient for local verification, and the exporter is a configuration change, not a code change, whenever a real collector target exists.
 
 ---
 

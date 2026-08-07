@@ -62,3 +62,14 @@ def get_log_format():
         or "json" (structured, for aggregated/production use). See ADR-0011.
     """
     return os.getenv("LOG_FORMAT", "text")
+
+
+def get_telemetry_enabled():
+    """
+    Whether OpenTelemetry tracing is enabled.
+
+    Returns:
+        bool: True if OTEL_ENABLED is set to a truthy value, defaulting to
+        False. See ADR-0012.
+    """
+    return os.getenv("OTEL_ENABLED", "false").strip().lower() in ("1", "true", "yes", "on")

@@ -112,4 +112,4 @@ Repository and Client logging already roughly follows this — Sprint 6.1 reform
 
 ---
 
-Previous: [ADR 0010](0010-observability-deferred-to-sprint-6.md) · Back to the [ADR index](index.md).
+Previous: [ADR 0010](0010-observability-deferred-to-sprint-6.md) · Back to the [ADR index](index.md) · Next: [ADR 0012](0012-opentelemetry-tracing.md)

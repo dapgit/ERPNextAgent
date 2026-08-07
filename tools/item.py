@@ -1,8 +1,10 @@
+from observability.telemetry import get_tracer
 from services import item_service
 from utils.logger import get_logger
 from utils.tool_execution import execute_tool
 
 logger = get_logger(__name__)
+tracer = get_tracer(__name__)
 
 
 def get_item(item_code: str) -> str:
@@ -10,12 +12,13 @@ def get_item(item_code: str) -> str:
     logger.info("Handling get_item request", extra={"entity": "Item"})
 
     def _get_item() -> str:
-        item = item_service.get_item(item_code)
+        with tracer.start_as_current_span("tools.item.get_item"):
+            item = item_service.get_item(item_code)
 
-        if item is None:
-            return f"No item found with code or name '{item_code}'."
+            if item is None:
+                return f"No item found with code or name '{item_code}'."
 
-        return f"""Item Code: {item.code}
+            return f"""Item Code: {item.code}
 Item Name: {item.name}
 Item Group: {item.item_group}
 Stock UOM: {item.stock_uom}"""

@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional
 
 from clients.erpnext_rest_client import ERPNextRESTClient
 from models.company import Company
+from observability.telemetry import traced
 from utils.exceptions import ERPNextResourceNotFoundError
 from utils.logger import get_logger
 
@@ -30,6 +31,7 @@ class ERPNextCompanyRepository(CompanyRepository):
         self._client = client or ERPNextRESTClient()
         self._company_name = company_name
 
+    @traced()
     def get_company_information(self) -> Company:
         company_name = self._company_name or self._first_available_company_name()
         logger.info(

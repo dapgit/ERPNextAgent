@@ -1,8 +1,10 @@
+from observability.telemetry import get_tracer
 from services import customer_service
 from utils.logger import get_logger
 from utils.tool_execution import execute_tool
 
 logger = get_logger(__name__)
+tracer = get_tracer(__name__)
 
 
 def get_customer(customer_name: str) -> str:
@@ -21,12 +23,13 @@ def get_customer(customer_name: str) -> str:
     logger.info("Handling get_customer request", extra={"entity": "Customer"})
 
     def _get_customer() -> str:
-        customer = customer_service.get_customer(customer_name)
+        with tracer.start_as_current_span("tools.customer.get_customer"):
+            customer = customer_service.get_customer(customer_name)
 
-        if customer is None:
-            return f"No customer found with name '{customer_name}'."
+            if customer is None:
+                return f"No customer found with name '{customer_name}'."
 
-        return f"""Customer Name: {customer.name}
+            return f"""Customer Name: {customer.name}
 Customer Group: {customer.customer_group}
 Territory: {customer.territory}
 Customer Type: {customer.customer_type}"""

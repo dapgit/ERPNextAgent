@@ -1,3 +1,5 @@
 google-antigravity
 python-dotenv
 requests
+opentelemetry-sdk
+opentelemetry-instrumentation-requests

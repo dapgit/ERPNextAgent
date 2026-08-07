@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional
 
 from clients.erpnext_rest_client import ERPNextRESTClient
 from models.customer import Customer
+from observability.telemetry import traced
 from utils.exceptions import ERPNextResourceNotFoundError
 from utils.logger import get_logger
 
@@ -25,6 +26,7 @@ class ERPNextCustomerRepository(CustomerRepository):
     def __init__(self, client: Optional[ERPNextRESTClient] = None):
         self._client = client or ERPNextRESTClient()
 
+    @traced()
     def get_customer(self, customer_name: str) -> Optional[Customer]:
         name = customer_name.strip()
         logger.info(
