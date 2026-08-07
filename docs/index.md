@@ -7,7 +7,7 @@ last_reviewed: 2026-08-06
 
 # Documentation Index
 
-This is the entry point for ERPNextAgent documentation. Sprint 5 is in progress: milestones 5.1–5.6 are complete and recorded; remaining error-handling scope is the active work before Sprint 6.
+This is the entry point for ERPNextAgent documentation. Sprint 5 is complete (milestones 5.1–5.7); Sprint 6 (Observability) is next.
 
 ## Start here
 

@@ -7,7 +7,7 @@ last_reviewed: 2026-08-06
 
 # Sprint Journals
 
-The journals record implementation evidence. Sprint 5 is in progress; its milestones 5.1–5.6 are documented and complete.
+The journals record implementation evidence. Sprint 5 is complete; its milestones 5.1–5.7 are documented.
 
 | Sprint | Focus | Status | Journal |
 | --- | --- | --- | --- |
@@ -15,7 +15,7 @@ The journals record implementation evidence. Sprint 5 is in progress; its milest
 | 2 | Custom tools | Completed | [Read](sprint-02-custom-tools.md) |
 | 3 | Interactive application | Completed | [Read](sprint-03-interactive-application.md) |
 | 4 | Repository pattern | Completed | [Read](sprint-04-repository-pattern.md) |
-| 5 | ERPNext REST foundation | In progress — 5.1–5.6 complete | [Read](sprint-05-erpnext-rest-foundation.md) |
+| 5 | ERPNext REST foundation | Completed | [Read](sprint-05-erpnext-rest-foundation.md) |
 | 6–10 | Future capabilities | Planned | [Roadmap](../project-roadmap.md) |
 
 ## Revision history

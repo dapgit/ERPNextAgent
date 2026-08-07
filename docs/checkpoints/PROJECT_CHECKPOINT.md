@@ -2,7 +2,7 @@
 
     Checkpoint Date: 07-Aug-2026
 
-    Current Sprint: Sprint 5 (Milestones 5.5 and 5.6 Complete)
+    Current Sprint: Sprint 5 (Complete)
 
     Project Status: Active Development
 
@@ -72,10 +72,11 @@ Completed:
     Sprint 5.4
     Sprint 5.5
     Sprint 5.6
+    Sprint 5.7
 
 Active Milestone:
 
-Sprint 5 – Error Handling (remaining scope), then Sprint 6 – Observability
+Sprint 6 – Observability
 Technology Stack
 
 Python 3.12
@@ -481,17 +482,7 @@ Documentation should evolve alongside implementation.
 Small, reviewable sprints reduce architectural risk.
 Current Milestone
 
-Sprint 5.5 and 5.6 (complete)
-
-Objectives:
-
-    Add an Item domain model and repository contract.
-
-    Expose Item lookup through the existing Service and Tool layers.
-
-    Verify exact lookup, partial-name fallback, no-match behavior, and factory selection without a network dependency.
-
-    Remove the mock repositories and any hardcoded/configured company name now that a live ERPNext instance is available.
+Sprint 5 (complete) — Company, Customer, Item, Error Handling
 
 Completed Sprint 5 follow-up work:
 
@@ -503,17 +494,9 @@ Completed Sprint 5 follow-up work:
 
     Sprint 5.6 removed MockCompanyRepository, MockCustomerRepository, and MockItemRepository along with the ERPNEXT_COMPANY environment variable and several ad-hoc, typo-matching workarounds that had accumulated around company-name resolution. The repository factory now always constructs the ERPNext-backed repositories, and ERPNextCompanyRepository always resolves the company by listing it from ERPNext.
 
+    Sprint 5.7 reviewed a proposed 5-phase error-handling plan against the actual codebase. The exception hierarchy (utils/exceptions.py), the REST client's typed exceptions, and the repository layer's not-found handling already matched the intended design, so those were left unchanged. The one real gap — nothing catching exceptions before they reached the agent, letting messages like "ERPNext rejected the request to http://localhost:8080/..." leak internal hostnames and paths — was closed with a single shared helper, utils/tool_execution.execute_tool(), which the Company, Customer, and Item tools now route through. It logs the real exception server-side and returns a short, safe, user-facing message.
+
 Future Roadmap
-
-Sprint 5
-
-    Company
-
-    Customer
-
-    Item
-
-    Error Handling
 
 Sprint 6
 
@@ -555,7 +538,7 @@ When resuming this project:
 
     Preserve the current architecture.
 
-    Continue from Sprint 5 error handling, then Sprint 6 (Observability).
+    Continue from Sprint 6 (Observability).
 
     Update documentation alongside implementation.
 
@@ -581,6 +564,6 @@ Documentation Depth: 8.5 / 10
 
 Overall Project Health: 9.3 / 10
 
-The project is in a healthy state and is ready to continue with Sprint 5's remaining error-handling scope, then Sprint 6.
+Sprint 5 is complete. The project is in a healthy state and is ready to continue with Sprint 6.
 
 The primary focus going forward should be expanding ERPNext functionality while continuing to improve the depth and quality of the documentation without compromising the architectural principles established in Sprints 1–5.

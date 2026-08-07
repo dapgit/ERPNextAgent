@@ -13,7 +13,7 @@ This project follows a sprint-based development approach. Each sprint represents
 
 ---
 
-# Sprint 5 – ERPNext REST Integration (in progress)
+# Sprint 5 – ERPNext REST Integration (complete)
 
 ## Completed milestones
 
@@ -47,6 +47,12 @@ This project follows a sprint-based development approach. Each sprint represents
 - Removed `MockCompanyRepository`, `MockCustomerRepository`, and `MockItemRepository`; the app now always talks to a live ERPNext instance, and the repository factory no longer branches on whether `ERPNEXT_URL` is set.
 - Removed the `ERPNEXT_COMPANY` environment variable and the ad-hoc, typo-matching patches that had accumulated around resolving the company name: a global monkey-patch of `requests.Session.request`, a bare `except Exception` fallback in the Company tool that bypassed the Repository/Service layers, and hardcoded string matching in the REST client, repository factory, and settings module.
 - `ERPNextCompanyRepository` now always resolves the company by listing Companies from ERPNext and using the first one visible to the configured API user — nothing about the company is configured or hardcoded anywhere.
+
+### 5.7 — Tool-layer error handling (Sprint 5 complete)
+
+- Added `utils/tool_execution.execute_tool()`, a shared helper the Company, Customer, and Item tools now route their logic through. It catches `ERPNextError` subclasses (and `ValueError` for input validation) raised anywhere below the Tool layer, logs the real exception server-side, and returns a short, user-facing message with no stack traces, hostnames, or REST paths.
+- The existing exception hierarchy (`utils/exceptions.py`) and the repository layer's not-found handling were reviewed and left as-is — both already matched the intended design, so no rework was needed there.
+- Closes the last open item from Sprint 5's roadmap (Company, Customer, Item, Error Handling).
 
 ## Deferred
 
@@ -167,10 +173,9 @@ This project follows a sprint-based development approach. Each sprint represents
 
 # Upcoming
 
-## Sprint 5 (in progress)
+## Sprint 5 (complete)
 
-- 5.1 and 5.2 are recorded above.
-- Remaining scope includes additional repositories, controlled end-to-end verification, and follow-on resilience work.
+- 5.1 through 5.7 are recorded above.
 
 ---
 
@@ -183,7 +188,7 @@ This project follows a sprint-based development approach. Each sprint represents
 | 0.3.0 | Sprint 3 |
 | 0.4.0 | Sprint 4 |
 | 0.5.0 | Sprint 5.1–5.4 |
-| 0.6.0 | Sprint 5.5–5.6 |
+| 0.6.0 | Sprint 5.5–5.7 |
 
 Future releases will continue following semantic versioning aligned with sprint milestones.
 
@@ -193,7 +198,7 @@ Future releases will continue following semantic versioning aligned with sprint 
 | --- | --- |
 | 2026-08-04 | Added documentation-system metadata and navigation. |
 | 2026-08-06 | Recorded Sprint 5.1–5.2 implementation and observability deferral. |
-| 2026-08-07 | Recorded Sprint 5.5 Item lookup completion and Sprint 5.6 mock-repository removal. |
+| 2026-08-07 | Recorded Sprint 5.5 Item lookup completion, Sprint 5.6 mock-repository removal, and Sprint 5.7 tool-layer error handling. Sprint 5 is now complete. |
 
 ---
 
