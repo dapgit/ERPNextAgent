@@ -291,6 +291,11 @@ GEMINI_API_KEY=your_api_key
 ERPNEXT_URL=https://your-erpnext-instance
 ERPNEXT_API_KEY=your_erpnext_api_key
 ERPNEXT_API_SECRET=your_erpnext_api_secret
+
+# Optional; defaults shown. See ADR-0011 / ADR-0012.
+# LOG_LEVEL=INFO
+# LOG_FORMAT=text
+# OTEL_ENABLED=false
 ```
 
 ---
