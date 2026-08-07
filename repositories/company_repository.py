@@ -3,7 +3,6 @@ from typing import Any, Dict, Optional
 
 from clients.erpnext_rest_client import ERPNextRESTClient
 from models.company import Company
-from settings import get_erpnext_company_name
 from utils.exceptions import ERPNextResourceNotFoundError
 from utils.logger import get_logger
 
@@ -20,21 +19,6 @@ class CompanyRepository(ABC):
         raise NotImplementedError
 
 
-class MockCompanyRepository(CompanyRepository):
-    """In-memory repository used before ERPNext is configured."""
-
-    _COMPANY = Company(
-        name="ABC Traders Pvt Ltd",
-        country="India",
-        currency="INR",
-        fiscal_year="2026-2027",
-        industry="Distribution",
-    )
-
-    def get_company_information(self) -> Company:
-        return self._COMPANY
-
-
 class ERPNextCompanyRepository(CompanyRepository):
     """Retrieves Company information from a live ERPNext instance."""
 
@@ -44,7 +28,7 @@ class ERPNextCompanyRepository(CompanyRepository):
         company_name: Optional[str] = None,
     ):
         self._client = client or ERPNextRESTClient()
-        self._company_name = company_name or get_erpnext_company_name()
+        self._company_name = company_name
 
     def get_company_information(self) -> Company:
         company_name = self._company_name or self._first_available_company_name()

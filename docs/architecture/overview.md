@@ -7,7 +7,7 @@ last_reviewed: 2026-08-06
 
 # Architecture Overview
 
-Sprint 5 has introduced the first live ERPNext integration path without changing the Agent, Tool, or Service contracts. The Company path now chooses either a mock repository or an ERPNext REST-backed repository at application initialization.
+Sprint 5 has introduced the first live ERPNext integration path without changing the Agent, Tool, or Service contracts. The Company path is now always backed by the ERPNext REST repository.
 
 ## Current dependency flow
 
@@ -17,13 +17,12 @@ flowchart TD
   A --> T[Tool]
   T --> S[Service]
   S --> C[CompanyRepository contract]
-  C --> M[MockCompanyRepository]
   C --> R[ERPNextCompanyRepository]
   R --> H[ERPNextRESTClient]
   H --> E[ERPNext REST API]
 ```
 
-`_create_repository()` selects `ERPNextCompanyRepository` when `ERPNEXT_URL` is configured; otherwise it selects `MockCompanyRepository`. Both fulfil `CompanyRepository`, so the service invokes the same `get_company_information()` capability in either case.
+`get_company_repository()` always constructs `ERPNextCompanyRepository`, memoizing the instance for reuse within the process.
 
 ## Layer responsibilities
 
@@ -49,13 +48,9 @@ sequenceDiagram
   participant E as ERPNext
   T->>S: get_company_information()
   S->>R: get_company_information()
-  alt ERPNEXT_COMPANY is configured
-    R->>C: get_doc("Company", name)
-  else no company configured
-    R->>C: get_list("Company")
-    C-->>R: first visible name
-    R->>C: get_doc("Company", name)
-  end
+  R->>C: get_list("Company")
+  C-->>R: first visible name
+  R->>C: get_doc("Company", name)
   C->>E: authenticated GET
   E-->>C: JSON response
   C-->>R: parsed response or typed integration error

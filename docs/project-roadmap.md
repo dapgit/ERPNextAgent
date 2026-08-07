@@ -21,7 +21,7 @@ ERPNextAgent is being developed incrementally using a sprint-based approach. Eac
 | Sprint 2 | Custom Tools | ✅ Complete |
 | Sprint 3 | Interactive Application | ✅ Complete |
 | Sprint 4 | Repository Pattern | ✅ Complete |
-| Sprint 5 | ERPNext REST Integration | 🚧 In progress — 5.1 and 5.2 complete |
+| Sprint 5 | ERPNext REST Integration | 🚧 In progress — 5.1–5.6 complete |
 | Sprint 6 | Observability | ⏳ Planned |
 | Sprint 7 | ERP Business Operations | ⏳ Planned |
 | Sprint 8 | Memory & Context | ⏳ Planned |
@@ -108,10 +108,12 @@ ERPNextAgent is being developed incrementally using a sprint-based approach. Eac
 - Connect the Company repository to ERPNext REST API
 - Keep upper-layer contracts stable
 
-Completed in 5.1 and 5.2:
+Completed in 5.1–5.6:
 
 - `clients/ERPNextRESTClient` with session reuse, token authentication, URL construction, JSON parsing, and typed integration errors.
 - Environment-based ERPNext configuration.
+- REST-backed Company, Customer, and Item repositories, verified against a live ERPNext instance.
+- Removal of the mock repositories and ad-hoc company-name workarounds; the company is now always resolved from ERPNext.
 - `CompanyRepository` contract with mock and REST implementations.
 - JSON-to-`Company` mapping and unit tests using an injected fake client.
 

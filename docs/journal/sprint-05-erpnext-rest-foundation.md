@@ -9,7 +9,7 @@ last_reviewed: 2026-08-06
 
 ## Sprint goal
 
-Validate the repository boundary against a real ERPNext transport without changing the Agent, Tool, or Service contracts. Sprint 5 is not complete; this record covers completed milestones 5.1 and 5.2 only.
+Validate the repository boundary against a real ERPNext transport without changing the Agent, Tool, or Service contracts. Sprint 5 is not complete; milestones 5.1–5.4 are complete and 5.5 is active.
 
 ## 5.1 — Integration boundary and configuration
 
@@ -62,6 +62,17 @@ sequenceDiagram
   Service-->>Tool: Company
 ```
 
+## 5.3–5.4 — Repository scaling
+
+- Completed the REST-backed Company repository, repository factory, request logging, and REST-backed Customer lookup.
+
+## 5.5 — REST-backed Item lookup
+
+- Added the Item domain model, mock and REST repositories, service, and registered agent tool.
+- Exact Item lookup falls back to a partial item-name search; unit tests cover mapping, fallback, no-match, and factory selection.
+- The standard pytest command is now configured to resolve project imports.
+- Controlled live verification remains pending until ERPNext is reachable.
+
 ## Lessons learned
 
 - A small, entity-agnostic REST client keeps the repository concise and makes independent testing practical.
@@ -73,7 +84,7 @@ sequenceDiagram
 
 The implementation is a sound first integration slice. Review identified three scope boundaries that the documentation now makes explicit:
 
-- Only Company is REST-backed; Customer remains mock-backed.
+- Company and Customer are REST-backed; Item lookup is the active Sprint 5.5 milestone.
 - There is no OpenTelemetry implementation or package yet.
 - Retry policy, write operations, broader repository migration, and controlled integration-test evidence remain future work.
 

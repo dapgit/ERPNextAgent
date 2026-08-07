@@ -1,9 +1,5 @@
 from models.customer import Customer
-from repositories.customer_repository import (
-    CustomerRepository,
-    ERPNextCustomerRepository,
-    MockCustomerRepository,
-)
+from repositories.customer_repository import ERPNextCustomerRepository
 from utils.exceptions import ERPNextResourceNotFoundError
 
 
@@ -23,11 +19,6 @@ class FakeERPNextRESTClient:
 
     def get_list(self, doctype, fields=None, filters=None):
         return self._list_response
-
-
-def test_mock_repository_satisfies_the_abstract_contract():
-    assert issubclass(MockCustomerRepository, CustomerRepository)
-    assert isinstance(MockCustomerRepository().get_customer("ABC Traders"), Customer)
 
 
 def test_erpnext_repository_maps_json_to_the_customer_domain_model_on_exact_match():

@@ -16,7 +16,6 @@ flowchart TD
   A[Antigravity agent] --> T[Tool]
   T --> S[Service]
   S --> P[CompanyRepository contract]
-  P --> M[MockCompanyRepository]
   P --> R[ERPNextCompanyRepository]
   R --> C[ERPNextRESTClient]
   C --> E[ERPNext REST API]
@@ -30,7 +29,6 @@ The client owns `requests.Session`, token authentication headers, URL constructi
 | --- | --- |
 | `ERPNEXT_URL` | Enables the REST-backed Company repository and supplies its base URL. |
 | `ERPNEXT_API_KEY` / `ERPNEXT_API_SECRET` | Supply ERPNext token credentials. Do not commit them. |
-| `ERPNEXT_COMPANY` | Optional Company document name; otherwise the first visible Company is used. |
 
 ## Security and error behavior
 

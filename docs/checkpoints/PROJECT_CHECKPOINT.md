@@ -1,8 +1,8 @@
     Project: ERPNextAgent
 
-    Checkpoint Date: 06-Aug-2026
+    Checkpoint Date: 07-Aug-2026
 
-    Current Sprint: Sprint 5 (Milestone 5.2 Complete)
+    Current Sprint: Sprint 5 (Milestones 5.5 and 5.6 Complete)
 
     Project Status: Active Development
 
@@ -68,10 +68,14 @@ Completed:
     Sprint 5.1
 
     Sprint 5.2
+    Sprint 5.3
+    Sprint 5.4
+    Sprint 5.5
+    Sprint 5.6
 
-Next Milestone:
+Active Milestone:
 
-Sprint 5.3 – Replace Mock Company Repository
+Sprint 5 – Error Handling (remaining scope), then Sprint 6 – Observability
 Technology Stack
 
 Python 3.12
@@ -237,6 +241,8 @@ clients/
 repositories/
     company_repository.py
     customer_repository.py
+    item_repository.py
+    factory.py
 
 services/
 
@@ -304,15 +310,11 @@ Strong documentation structure.
 Good unit test foundation.
 Remaining Technical Improvements
 
-Introduce Repository Factory.
-
 Expand structured logging.
 
 Introduce OpenTelemetry during Sprint 6.
 
 Expand helper methods inside the REST Client.
-
-Continue replacing mock repositories.
 Documentation Review
 
 Documentation Quality
@@ -477,19 +479,29 @@ REST-first was the correct architectural decision.
 Documentation should evolve alongside implementation.
 
 Small, reviewable sprints reduce architectural risk.
-Next Sprint
+Current Milestone
 
-Sprint 5.3
+Sprint 5.5 and 5.6 (complete)
 
 Objectives:
 
-    Replace Mock Company Repository.
+    Add an Item domain model and repository contract.
 
-    Retrieve live Company data.
+    Expose Item lookup through the existing Service and Tool layers.
 
-    Verify Repository abstraction.
+    Verify exact lookup, partial-name fallback, no-match behavior, and factory selection without a network dependency.
 
-    Keep Service and Tool layers unchanged.
+    Remove the mock repositories and any hardcoded/configured company name now that a live ERPNext instance is available.
+
+Completed Sprint 5 follow-up work:
+
+    Sprint 5.3 replaced the mock Company repository with a REST-backed implementation.
+
+    Sprint 5.4 added the repository factory, basic request logging, and a REST-backed Customer repository.
+
+    Sprint 5.5 added the Item domain model, REST-backed repository, service, and tool; verified end-to-end against a live ERPNext instance.
+
+    Sprint 5.6 removed MockCompanyRepository, MockCustomerRepository, and MockItemRepository along with the ERPNEXT_COMPANY environment variable and several ad-hoc, typo-matching workarounds that had accumulated around company-name resolution. The repository factory now always constructs the ERPNext-backed repositories, and ERPNextCompanyRepository always resolves the company by listing it from ERPNext.
 
 Future Roadmap
 
@@ -543,7 +555,7 @@ When resuming this project:
 
     Preserve the current architecture.
 
-    Continue from Sprint 5.3.
+    Continue from Sprint 5 error handling, then Sprint 6 (Observability).
 
     Update documentation alongside implementation.
 
@@ -569,6 +581,6 @@ Documentation Depth: 8.5 / 10
 
 Overall Project Health: 9.3 / 10
 
-The project is in a healthy state and is ready to continue with Sprint 5.3.
+The project is in a healthy state and is ready to continue with Sprint 5's remaining error-handling scope, then Sprint 6.
 
 The primary focus going forward should be expanding ERPNext functionality while continuing to improve the depth and quality of the documentation without compromising the architectural principles established in Sprints 1–5.

@@ -13,7 +13,7 @@ last_reviewed: 2026-08-06
 
 # Project Status
 
-**Current Sprint:** Sprint 5 in progress (milestones 5.1 and 5.2 completed)
+**Current Sprint:** Sprint 5 in progress (milestones 5.1–5.4 complete; 5.5 active)
 
 | Area | Status |
 |------|--------|
@@ -24,7 +24,7 @@ last_reviewed: 2026-08-06
 | Layered Architecture | ✅ Complete |
 | Repository Pattern | ✅ Complete |
 | Domain Models | ✅ Complete |
-| ERPNext REST foundation | 🚧 In progress — milestones 5.1 and 5.2 complete |
+| ERPNext REST foundation | 🚧 In progress — Item lookup is awaiting controlled live verification |
 | Multi-Agent Support | ⏳ Planned |
 
 ---
@@ -291,8 +291,6 @@ GEMINI_API_KEY=your_api_key
 ERPNEXT_URL=https://your-erpnext-instance
 ERPNEXT_API_KEY=your_erpnext_api_key
 ERPNEXT_API_SECRET=your_erpnext_api_secret
-# Optional; otherwise the first visible Company is used
-ERPNEXT_COMPANY=your-company-name
 ```
 
 ---
@@ -367,10 +365,6 @@ For the Company capability today:
 ```text
 Repository
     ↓
-MockCompanyRepository (when ERPNEXT_URL is unset)
-
-or
-
 ERPNextCompanyRepository
     ↓
 ERPNextRESTClient
@@ -435,14 +429,14 @@ Repository
    ▼
 CompanyRepository contract
    │
-   ├── MockCompanyRepository
-   └── ERPNextCompanyRepository
-          │
-          ▼
-   ERPNextRESTClient
-          │
-          ▼
-   ERPNext REST API
+   ▼
+ERPNextCompanyRepository
+   │
+   ▼
+ERPNextRESTClient
+   │
+   ▼
+ERPNext REST API
 ```
 
 The Company Service and Tool use the same capability regardless of implementation. Customer remains mock-backed in this increment.

@@ -7,7 +7,7 @@ last_reviewed: 2026-08-06
 
 # Repository Layer
 
-Repositories are the entity-oriented data boundary. They return domain models to services and hide whether that data was sourced from memory or ERPNext. Sprint 5 proves the boundary for Company while leaving Customer mock-backed.
+Repositories are the entity-oriented data boundary. They return domain models to services and hide ERPNext's REST details from the rest of the app.
 
 ## Company contract and implementations
 
@@ -18,10 +18,9 @@ class CompanyRepository(ABC):
         ...
 ```
 
-| Implementation | When used | Responsibility |
-| --- | --- | --- |
-| `MockCompanyRepository` | `ERPNEXT_URL` is not configured | Provides the previous in-memory Company. |
-| `ERPNextCompanyRepository` | `ERPNEXT_URL` is configured | Retrieves a Company through the REST client and maps it to `Company`. |
+| Implementation | Responsibility |
+| --- | --- |
+| `ERPNextCompanyRepository` | Retrieves a Company through the REST client and maps it to `Company`. |
 
 The current composition helper is local to `company_repository.py`: `_create_repository()` makes the selection once at module initialization. This is sufficient for one migrated capability, but a dedicated factory is a future improvement once multiple implementations need selection.
 
@@ -29,8 +28,7 @@ The current composition helper is local to `company_repository.py`: `_create_rep
 
 `ERPNextCompanyRepository` delegates all transport work to `ERPNextRESTClient`:
 
-- With `ERPNEXT_COMPANY`, call `get_doc("Company", name)`.
-- Without it, call `get_list("Company")`, select the first visible Company, then fetch that document.
+- Call `get_list("Company")`, select the first visible Company, then fetch that document with `get_doc("Company", name)`.
 - Convert the returned `data` object to `Company` using `company_name` (or `name`), `country`, and `default_currency`.
 - Preserve the explicit placeholder for `fiscal_year` and `industry`, which are not sourced from the Company DocType in this increment.
 

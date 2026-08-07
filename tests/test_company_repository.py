@@ -1,11 +1,7 @@
 import pytest
 
 from models.company import Company
-from repositories.company_repository import (
-    CompanyRepository,
-    ERPNextCompanyRepository,
-    MockCompanyRepository,
-)
+from repositories.company_repository import ERPNextCompanyRepository
 
 
 class FakeERPNextRESTClient:
@@ -22,11 +18,6 @@ class FakeERPNextRESTClient:
 
     def get_list(self, doctype, fields=None, filters=None):
         return self._list_response
-
-
-def test_mock_repository_satisfies_the_abstract_contract():
-    assert issubclass(MockCompanyRepository, CompanyRepository)
-    assert isinstance(MockCompanyRepository().get_company_information(), Company)
 
 
 def test_erpnext_repository_maps_json_to_the_company_domain_model():

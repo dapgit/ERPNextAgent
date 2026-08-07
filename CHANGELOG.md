@@ -2,7 +2,7 @@
 title: Changelog
 status: active
 audience: contributors
-last_reviewed: 2026-08-06
+last_reviewed: 2026-08-07
 ---
 
 # Changelog
@@ -30,10 +30,28 @@ This project follows a sprint-based development approach. Each sprint represents
 - Added document and list helpers, a reusable `requests.Session`, authentication headers, URL construction, JSON parsing, timeout handling, and context-manager cleanup.
 - Added repository mapping tests and an opt-in connectivity test.
 
+### 5.3–5.4 — Repository scaling
+
+- Completed the REST-backed Company repository, repository factory, basic request logging, and REST-backed Customer repository.
+- Preserved Service and Tool contracts while adding constructor-injected, network-free repository tests.
+
+### 5.5 — Item lookup (complete)
+
+- Added `Item` domain model and REST-backed `ItemRepository`.
+- Added the Item service and agent tool, with exact-code and partial-name lookup behavior.
+- Added factory selection coverage and pytest configuration so `.venv/bin/pytest` resolves project imports reliably.
+- Verified end-to-end against a live ERPNext instance.
+
+### 5.6 — Removed mock repositories and ad-hoc company-name workarounds
+
+- Removed `MockCompanyRepository`, `MockCustomerRepository`, and `MockItemRepository`; the app now always talks to a live ERPNext instance, and the repository factory no longer branches on whether `ERPNEXT_URL` is set.
+- Removed the `ERPNEXT_COMPANY` environment variable and the ad-hoc, typo-matching patches that had accumulated around resolving the company name: a global monkey-patch of `requests.Session.request`, a bare `except Exception` fallback in the Company tool that bypassed the Repository/Service layers, and hardcoded string matching in the REST client, repository factory, and settings module.
+- `ERPNextCompanyRepository` now always resolves the company by listing Companies from ERPNext and using the first one visible to the configured API user — nothing about the company is configured or hardcoded anywhere.
+
 ## Deferred
 
-- Customer remains backed by mock data; its REST repository is not yet implemented.
-- Retries, write operations, structured logging, and OpenTelemetry are not implemented. OpenTelemetry was evaluated and deliberately deferred to Sprint 6.
+- Retries, write operations, and OpenTelemetry are not implemented. OpenTelemetry was evaluated and deliberately deferred to Sprint 6.
+- Supplier, Inventory, Sales, and Purchase are placeholder modules with no implementation yet (planned for later sprints).
 
 # Sprint 4 – Repository Pattern
 
@@ -164,7 +182,8 @@ This project follows a sprint-based development approach. Each sprint represents
 | 0.2.0 | Sprint 2 |
 | 0.3.0 | Sprint 3 |
 | 0.4.0 | Sprint 4 |
-| 0.5.0 (in progress) | Sprint 5.1–5.2 |
+| 0.5.0 | Sprint 5.1–5.4 |
+| 0.6.0 | Sprint 5.5–5.6 |
 
 Future releases will continue following semantic versioning aligned with sprint milestones.
 
@@ -174,6 +193,7 @@ Future releases will continue following semantic versioning aligned with sprint 
 | --- | --- |
 | 2026-08-04 | Added documentation-system metadata and navigation. |
 | 2026-08-06 | Recorded Sprint 5.1–5.2 implementation and observability deferral. |
+| 2026-08-07 | Recorded Sprint 5.5 Item lookup completion and Sprint 5.6 mock-repository removal. |
 
 ---
 

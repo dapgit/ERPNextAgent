@@ -51,16 +51,3 @@ def get_log_level():
         str: The logging level name, defaulting to "INFO".
     """
     return os.getenv("LOG_LEVEL", "INFO")
-
-
-def get_erpnext_company_name():
-    """
-    Retrieve the name of the ERPNext Company document to use.
-
-    Optional: if unset, the ERPNext repository falls back to the first
-    company visible to the configured API user.
-
-    Returns:
-        str | None: The ERPNext Company name.
-    """
-    return os.getenv("ERPNEXT_COMPANY")
