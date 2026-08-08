@@ -22,8 +22,8 @@ ERPNextAgent is being developed incrementally using a sprint-based approach. Eac
 | Sprint 3 | Interactive Application | ✅ Complete |
 | Sprint 4 | Repository Pattern | ✅ Complete |
 | Sprint 5 | ERPNext REST Integration | ✅ Complete |
-| Sprint 6 | Observability | 🚧 In progress — 6.1, 6.3 complete |
-| Sprint 7 | ERP Business Operations | ⏳ Planned |
+| Sprint 6 | Observability + Platform Hardening | 🚧 In progress — 6.1, 6.3 complete |
+| Sprint 7 | ERP Business Operations | ⏳ Planned — gated on Sprint 6.6 (ADR-0013) |
 | Sprint 8 | Memory & Context | ⏳ Planned |
 | Sprint 9 | Multi-Agent Architecture | ⏳ Planned |
 | Sprint 10 | Production Readiness | ⏳ Planned |
@@ -124,9 +124,11 @@ Remaining Sprint 5 scope:
 - Perform controlled live integration verification and document the evidence.
 - Add only the resilience features justified by that evidence.
 
-## Sprint 6 – Observability
+## Sprint 6 – Observability + Platform Hardening
 
 OpenTelemetry was evaluated during Sprint 5 and deferred so the first REST path can stabilize without cross-cutting instrumentation. Sprint 6.1 (complete, see [ADR-0011](adr/0011-structured-logging-and-correlation-ids.md)) established the foundation: structured JSON/text logging and `contextvars`-based correlation IDs, propagated through Tool → Service → Repository → Client with no signature changes. Sprint 6.3 (complete, see [ADR-0012](adr/0012-opentelemetry-tracing.md)) built OpenTelemetry tracing on top of it — Company, Customer, and Item are all instrumented, exporting to the console, off by default via `OTEL_ENABLED`. Sprint 6.4 adds metrics; Sprint 6.5 completes the observability documentation.
+
+[ADR-0013](adr/0013-tiered-definition-of-done-and-platform-hardening.md) adds Sprint 6.6 — Platform Hardening — after 6.5 and before Sprint 7: retry/backoff for transient ERPNext failures and graceful handling of upstream rate-limit errors, fail-fast startup configuration validation, a CI pipeline, a written secrets-handling policy, and a security review pass. Sprint 7 does not begin until 6.6 is complete. The same ADR adopts a tiered Definition of Done — the full architecture/implementation/documentation/validation cycle for architecture-affecting sprints, a lighter code+tests+changelog-line cycle for small maintenance work — and reframes the project's primary objective as becoming enterprise-class, with the concrete gaps that still separates it from that (auth/authz, secrets management, CI, resilience, security review) tracked explicitly in the [checkpoint](checkpoints/PROJECT_CHECKPOINT.md) rather than assumed closed.
 
 ---
 
@@ -155,6 +157,7 @@ Completed-sprint evidence is maintained in the [sprint journals](journal/index.m
 | 2026-08-06 | Marked Sprint 5.1–5.2 complete and added the Sprint 6 observability decision. |
 | 2026-08-07 | Marked Sprint 5 complete and Sprint 6.1 (structured logging, correlation IDs) complete. |
 | 2026-08-07 | Marked Sprint 6.3 (OpenTelemetry tracing) complete. |
+| 2026-08-07 | Added Sprint 6.6 (Platform Hardening, gating Sprint 7) and the tiered Definition of Done, per ADR-0013. |
 
 ---
 

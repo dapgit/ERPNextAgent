@@ -92,4 +92,4 @@ Verified live, twice: once as a direct synchronous call, and again through `asyn
 
 ---
 
-Previous: [ADR 0011](0011-structured-logging-and-correlation-ids.md) · Back to the [ADR index](index.md).
+Previous: [ADR 0011](0011-structured-logging-and-correlation-ids.md) · Back to the [ADR index](index.md) · Next: [ADR 0013](0013-tiered-definition-of-done-and-platform-hardening.md)

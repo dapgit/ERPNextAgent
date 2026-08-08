@@ -33,21 +33,35 @@ It summarizes:
 This document should be updated after every major sprint.
 Executive Summary
 
-ERPNextAgent is an enterprise AI application built using Google Antigravity SDK and ERPNext.
+ERPNextAgent is built using Google Antigravity SDK and ERPNext.
 
-The project is intentionally designed as a learning and reference implementation rather than a quick prototype.
+As of ADR-0013, the project's primary objective is to become an enterprise-class application, with excellent-engineering-reference and learning value as secondary objectives — not the other way around. This is a direction, not a claim about the current state; see "Known gaps toward enterprise readiness" below for what still separates the two.
 
 The primary objectives are:
 
-    Learn Antigravity SDK through implementation.
+    Build and operate an enterprise-class ERPNext AI assistant.
 
-    Demonstrate enterprise software architecture.
+    Demonstrate enterprise software architecture as a byproduct of building it correctly, not as an exercise in isolation.
 
     Integrate with ERPNext using REST APIs.
 
     Later introduce MCP as an alternative integration layer.
 
     Produce documentation of comparable quality to production engineering projects.
+
+Known gaps toward enterprise readiness (tracked; scoped into Sprint 6.6 — see ADR-0013):
+
+    No auth/authz on the assistant itself (single-user CLI today; deferred deliberately to Sprint 9 alongside MCP/multi-agent work).
+
+    Secrets held in a plaintext .env with no rotation policy.
+
+    No CI pipeline running the test suite on every push.
+
+    No fail-fast configuration validation at startup.
+
+    No retry/backoff for transient ERPNext failures or graceful handling of upstream rate-limit errors (the Gemini 429 crash in this project's first debugging session is the concrete evidence for this gap).
+
+    No security review has been performed.
 
 Current Status
 
@@ -78,7 +92,7 @@ Completed:
 
 Active Milestone:
 
-Sprint 6.4 – Metrics (next), then Documentation (6.5). Sprint 6.2 (Correlation IDs) was folded into 6.1's design and implementation — see ADR-0011.
+Sprint 6.4 – Metrics (next), then Documentation (6.5), then Platform Hardening (6.6). Sprint 7 does not begin until 6.6 is complete — see ADR-0013. Sprint 6.2 (Correlation IDs) was folded into 6.1's design and implementation — see ADR-0011.
 Technology Stack
 
 Python 3.12
@@ -482,6 +496,8 @@ REST-first was the correct architectural decision.
 Documentation should evolve alongside implementation.
 
 Small, reviewable sprints reduce architectural risk.
+
+A blanket Definition of Done risks becoming the same debt problem in a different shape — tier it to the sprint's actual architectural weight, or the rule gets quietly skipped under time pressure (ADR-0013).
 Current Milestone
 
 Sprint 6.1 (complete) — Structured Logging and Correlation IDs
@@ -492,7 +508,11 @@ Sprint 6.3 (complete) — OpenTelemetry Tracing
 
 ADR-0012 defines the design: opentelemetry-sdk and opentelemetry-instrumentation-requests added as explicit dependencies (only the transitive opentelemetry-api was present before); a ConsoleSpanExporter gated by settings.get_telemetry_enabled() (OTEL_ENABLED, default false), relying on OpenTelemetry's built-in no-op provider so disabling telemetry requires no conditional code anywhere; a traced() decorator applied to Service and Repository methods for Company, Customer, and Item, deriving span names from a function's module-qualified __qualname__; Tool-layer spans started inside the existing inner closures rather than via decorators on the public Tool functions (same signature-safety reasoning as ADR-0011); correlation_id attached as an attribute on the root span (started once per turn in app.py) rather than merged into the trace ID; and RequestsInstrumentor wiring so the REST client needed no code changes. Verified live, including through asyncio.to_thread, producing one trace across Tool → Service → Repository → auto-instrumented HTTP spans; a span-naming collision (bare __qualname__ made Tool- and Service-layer spans for the same operation indistinguishable) was found during verification and fixed by qualifying span names with the module path.
 
-Next: Sprint 6.4 — Metrics, then Sprint 6.5 — Documentation.
+Sprint 6.6 (planned) — Platform Hardening
+
+ADR-0013 scopes this before Sprint 7 begins: retry/backoff for transient ERPNext failures and graceful handling of upstream rate-limit errors (the Gemini 429 crash already encountered), fail-fast configuration validation at startup, a CI pipeline running the test suite on every push, a written secrets-handling policy (vault/secrets-manager integration deferred until a real deployment target exists), and a security review pass. Auth/authz on the assistant itself is deferred deliberately to Sprint 9 alongside MCP/multi-agent work, not silently absent.
+
+Next: Sprint 6.4 — Metrics, then Sprint 6.5 — Documentation, then Sprint 6.6 — Platform Hardening. Sprint 7 is gated on Sprint 6.6.
 
 Completed Sprint 5 follow-up work:
 
@@ -518,7 +538,9 @@ Sprint 6
 
     Metrics
 
-Sprint 7
+    Platform Hardening (6.6, gates Sprint 7 — see ADR-0013)
+
+Sprint 7 (does not begin until Sprint 6.6 is complete)
 
     Inventory
 
@@ -550,6 +572,10 @@ When resuming this project:
 
     Continue from Sprint 6.4 (Metrics), building on the Sprint 6.1 logging/correlation and Sprint 6.3 tracing foundation.
 
+    Read ADR-0013 and apply the tiered Definition of Done: full four-part DoD (architecture, implementation, documentation, validation) for architecture-affecting sprints; code + tests + one changelog/checkpoint line for small maintenance work. Decide the tier explicitly at planning time.
+
+    Do not begin Sprint 7 before Sprint 6.6 (Platform Hardening) is complete.
+
     Update documentation alongside implementation.
 
     Do not bypass the Repository abstraction.
@@ -574,6 +600,8 @@ Documentation Depth: 8.5 / 10
 
 Overall Project Health: 9.3 / 10
 
+These scores reflect architecture, code, and documentation structure quality as reviewed; they are not a claim of production or deployment readiness. See "Known gaps toward enterprise readiness" above and ADR-0013 for what that would still require.
+
 Sprint 5 is complete, and Sprint 6.1 (structured logging and correlation IDs) and Sprint 6.3 (OpenTelemetry tracing) are complete. The project is in a healthy state and is ready to continue with Sprint 6.4 (Metrics).
 
-The primary focus going forward should be expanding ERPNext functionality while continuing to improve the depth and quality of the documentation without compromising the architectural principles established in Sprints 1–5.
+The primary focus going forward should be completing Sprint 6 (Metrics, documentation, then platform hardening) before expanding ERPNext functionality in Sprint 7, per ADR-0013 — continuing to improve the depth and quality of the documentation without compromising the architectural principles established in Sprints 1–5.
