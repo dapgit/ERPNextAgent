@@ -1,4 +1,5 @@
 import pytest
+from conftest import metric_data_points
 
 from utils.exceptions import (
     ERPNextAuthenticationError,
@@ -56,3 +57,53 @@ def test_unexpected_errors_do_not_leak_implementation_details():
 
     assert result == "An unexpected error occurred."
     assert "10.0.0.5" not in result
+
+
+def get_widget():
+    """Named like a real Tool function's inner closure so _derive_tool_name recovers "get_widget"."""
+    def _get_widget():
+        return "ok"
+
+    return execute_tool(_get_widget)
+
+
+def get_broken_widget():
+    def _get_broken_widget():
+        raise ERPNextTimeoutError("too slow")
+
+    return execute_tool(_get_broken_widget)
+
+
+def test_execute_tool_records_duration_tagged_with_the_recovered_tool_name():
+    get_widget()
+
+    points = metric_data_points("erpnextagent.tool.duration")
+    matching = [(attrs, value) for attrs, value in points if attrs.get("tool") == "get_widget"]
+
+    assert matching, points
+    attrs, value = matching[0]
+    assert attrs["outcome"] == "success"
+    assert value >= 0
+
+
+def test_execute_tool_records_errors_by_type_without_recording_on_success():
+    get_broken_widget()
+
+    duration_points = metric_data_points("erpnextagent.tool.duration")
+    error_points = metric_data_points("erpnextagent.tool.errors")
+
+    duration_matching = [
+        (attrs, v) for attrs, v in duration_points if attrs.get("tool") == "get_broken_widget"
+    ]
+    error_matching = [
+        (attrs, v) for attrs, v in error_points if attrs.get("tool") == "get_broken_widget"
+    ]
+
+    assert duration_matching, duration_points
+    assert duration_matching[0][0]["outcome"] == "error"
+
+    assert error_matching, error_points
+    assert error_matching[0][0]["error_type"] == "ERPNextTimeoutError"
+
+    success_points = metric_data_points("erpnextagent.tool.errors")
+    assert not any(attrs.get("tool") == "get_widget" for attrs, _ in success_points)

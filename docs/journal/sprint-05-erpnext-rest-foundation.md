@@ -108,4 +108,4 @@ OpenTelemetry is appropriate for end-to-end traces, metrics, and transport timin
 
 ---
 
-Previous: [Sprint 4](sprint-04-repository-pattern.md) · Back to the [journal index](index.md) · Next: [Roadmap](../project-roadmap.md)
+Previous: [Sprint 4](sprint-04-repository-pattern.md) · Back to the [journal index](index.md) · Next: [Sprint 6](sprint-06-observability.md)

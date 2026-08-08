@@ -1,23 +1,10 @@
-from opentelemetry import trace
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
-from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+from conftest import metric_data_points, span_exporter
 
-from observability.telemetry import get_tracer, traced
-
-# Application code only calls trace.set_tracer_provider() when OTEL_ENABLED
-# is set (default: false), which it isn't anywhere in the test suite. That
-# makes this the first and only call in the process, so it's safe to set a
-# test-only provider once here rather than fighting the OTel API's
-# "can only be set once" rule with a real one. See ADR-0012.
-_exporter = InMemorySpanExporter()
-_provider = TracerProvider()
-_provider.add_span_processor(SimpleSpanProcessor(_exporter))
-trace.set_tracer_provider(_provider)
+from observability.telemetry import get_meter, get_tracer, traced
 
 
 def _spans_by_name():
-    return {span.name: span for span in _exporter.get_finished_spans()}
+    return {span.name: span for span in span_exporter.get_finished_spans()}
 
 
 # Defined at module level, like real @traced usage (services/*.py functions,
@@ -49,8 +36,13 @@ def _outer():
     return _inner()
 
 
+@traced("flaky-op")
+def _flaky():
+    raise ValueError("boom")
+
+
 def test_traced_creates_a_span_named_after_the_module_qualified_function():
-    _exporter.clear()
+    span_exporter.clear()
 
     assert _get_customer("ABC") == "hello ABC"
 
@@ -58,7 +50,7 @@ def test_traced_creates_a_span_named_after_the_module_qualified_function():
 
 
 def test_traced_accepts_an_explicit_operation_name():
-    _exporter.clear()
+    span_exporter.clear()
 
     assert _do_something() == 42
     assert "custom-op" in _spans_by_name()
@@ -75,7 +67,7 @@ def test_traced_preserves_the_wrapped_functions_metadata():
 
 
 def test_traced_on_a_method_includes_the_class_name():
-    _exporter.clear()
+    span_exporter.clear()
 
     _Repository().get_item("Desk")
 
@@ -83,7 +75,7 @@ def test_traced_on_a_method_includes_the_class_name():
 
 
 def test_nested_traced_calls_share_one_trace_and_correct_parentage():
-    _exporter.clear()
+    span_exporter.clear()
 
     _outer()
 
@@ -97,3 +89,59 @@ def test_nested_traced_calls_share_one_trace_and_correct_parentage():
 def test_get_tracer_returns_a_usable_tracer():
     tracer = get_tracer("some.module")
     assert tracer is not None
+
+
+def test_get_meter_returns_a_usable_meter():
+    meter = get_meter("some.module")
+    assert meter is not None
+
+
+def test_traced_records_call_duration_with_operation_layer_and_success_outcome():
+    _do_something()
+
+    points = metric_data_points("erpnextagent.call.duration")
+    matching = [
+        (attrs, value) for attrs, value in points if attrs.get("operation") == "custom-op"
+    ]
+
+    assert matching, points
+    attrs, value = matching[0]
+    assert attrs["outcome"] == "success"
+    assert attrs["layer"] == "other"  # this test module isn't under a known layer prefix
+    assert value >= 0
+
+
+def test_traced_records_error_outcome_when_the_wrapped_function_raises():
+    try:
+        _flaky()
+    except ValueError:
+        pass
+
+    points = metric_data_points("erpnextagent.call.duration")
+    matching = [
+        (attrs, value) for attrs, value in points if attrs.get("operation") == "flaky-op"
+    ]
+
+    assert matching, points
+    attrs, _ = matching[0]
+    assert attrs["outcome"] == "error"
+
+
+def test_traced_metric_layer_matches_correlation_filters_layer_derivation():
+    _Repository().get_item("Desk")
+
+    points = metric_data_points("erpnextagent.call.duration")
+    matching = [
+        (attrs, value)
+        for attrs, value in points
+        if attrs.get("operation") == f"{__name__}._Repository.get_item"
+    ]
+
+    assert matching, points
+    attrs, _ = matching[0]
+    # This test module's __name__ doesn't start with "repositories.", so
+    # derive_layer falls back to "other" here too — the point is that
+    # traced() and CorrelationFilter agree, not that this module is a
+    # real repository. See ADR-0014 and tests/test_observability_correlation.py
+    # for the prefix-matching cases (repositories./clients./services./tools.).
+    assert attrs["layer"] == "other"

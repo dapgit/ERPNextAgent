@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 
 import requests
 
+from observability.telemetry import get_meter
 from settings import get_erpnext_api_key, get_erpnext_api_secret, get_erpnext_url
 from utils.exceptions import (
     ERPNextAuthenticationError,
@@ -18,6 +19,12 @@ from utils.logger import get_logger
 DEFAULT_TIMEOUT_SECONDS = 10
 
 logger = get_logger(__name__)
+
+_meter = get_meter(__name__)
+_request_counter = _meter.create_counter(
+    "erpnextagent.erpnext.requests",
+    description="Count of ERPNext REST requests, by doctype and outcome.",
+)
 
 
 class ERPNextRESTClient:
@@ -55,7 +62,7 @@ class ERPNextRESTClient:
 
     def get_doc(self, doctype: str, name: str) -> Dict[str, Any]:
         """Fetch a single document, e.g. get_doc("Company", "A Sports")."""
-        return self.get(f"/api/resource/{doctype}/{name}")
+        return self.get(f"/api/resource/{doctype}/{name}", doctype=doctype)
 
     def get_list(
         self,
@@ -70,15 +77,25 @@ class ERPNextRESTClient:
         if filters:
             params["filters"] = json.dumps(filters)
 
-        return self.get(f"/api/resource/{doctype}", params=params or None)
+        return self.get(f"/api/resource/{doctype}", params=params or None, doctype=doctype)
 
-    def get(self, path: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def get(
+        self,
+        path: str,
+        params: Optional[Dict[str, Any]] = None,
+        doctype: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """
         Perform an authenticated GET request and return the parsed JSON body.
 
         Args:
             path: API path, e.g. "/api/resource/Customer/ABC Traders".
             params: Optional query string parameters.
+            doctype: The ERPNext doctype being queried, if known (e.g.
+                "Company"), recorded as a metric attribute. Bounded by the
+                small set of doctypes this app queries — never derived from
+                the raw path, which can contain a customer/item name. See
+                ADR-0014.
 
         Returns:
             The parsed JSON response body.
@@ -94,26 +111,32 @@ class ERPNextRESTClient:
         url = self._build_url(path)
         logger.info("ERPNext request: GET %s", path)
         start = time.perf_counter()
+        outcome = "error"
 
         try:
-            response = self._session.get(url, params=params, timeout=self._timeout)
-        except requests.exceptions.Timeout as exc:
-            logger.error("ERPNext request timed out: GET %s", path)
-            raise ERPNextTimeoutError(f"Timed out calling {url}") from exc
-        except requests.exceptions.RequestException as exc:
-            logger.error("ERPNext request failed: GET %s (%s)", path, exc)
-            raise ERPNextConnectionError(f"Failed to reach {url}: {exc}") from exc
+            try:
+                response = self._session.get(url, params=params, timeout=self._timeout)
+            except requests.exceptions.Timeout as exc:
+                logger.error("ERPNext request timed out: GET %s", path)
+                raise ERPNextTimeoutError(f"Timed out calling {url}") from exc
+            except requests.exceptions.RequestException as exc:
+                logger.error("ERPNext request failed: GET %s (%s)", path, exc)
+                raise ERPNextConnectionError(f"Failed to reach {url}: {exc}") from exc
 
-        duration_ms = (time.perf_counter() - start) * 1000
-        logger.info(
-            "ERPNext response: %s GET %s in %.0fms",
-            response.status_code,
-            path,
-            duration_ms,
-            extra={"duration_ms": round(duration_ms, 1)},
-        )
+            duration_ms = (time.perf_counter() - start) * 1000
+            logger.info(
+                "ERPNext response: %s GET %s in %.0fms",
+                response.status_code,
+                path,
+                duration_ms,
+                extra={"duration_ms": round(duration_ms, 1)},
+            )
 
-        return self._parse_response(response, url)
+            result = self._parse_response(response, url)
+            outcome = "success"
+            return result
+        finally:
+            _request_counter.add(1, {"doctype": doctype or "unknown", "outcome": outcome})
 
     def close(self) -> None:
         self._session.close()

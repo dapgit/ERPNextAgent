@@ -24,6 +24,7 @@ ADRs capture architectural decisions evidenced through the current implementatio
 | [0011](0011-structured-logging-and-correlation-ids.md) | Structured logging and `contextvars`-based correlation IDs | Accepted | 6.1 |
 | [0012](0012-opentelemetry-tracing.md) | OpenTelemetry tracing, console exporter first | Accepted | 6.3 |
 | [0013](0013-tiered-definition-of-done-and-platform-hardening.md) | Tiered Definition of Done; Sprint 6.6 platform hardening before Sprint 7 | Accepted | 6.4 |
+| [0014](0014-opentelemetry-metrics.md) | OpenTelemetry metrics: reuse HTTP auto-instrumentation, extend traced()/execute_tool(), explicit cardinality rule | Accepted | 6.4 |
 
 ## Revision history
 
@@ -33,6 +34,7 @@ ADRs capture architectural decisions evidenced through the current implementatio
 | 2026-08-06 | Added Sprint 5 integration and observability decisions. |
 | 2026-08-07 | Added the Sprint 6.1 structured logging and correlation ID proposal, later accepted. Added the Sprint 6.3 OpenTelemetry tracing proposal. |
 | 2026-08-07 | Accepted the tiered Definition of Done and the Sprint 6.6 platform-hardening milestone. |
+| 2026-08-07 | Added the Sprint 6.4 metrics proposal. |
 
 ---
 

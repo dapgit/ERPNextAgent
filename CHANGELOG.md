@@ -36,10 +36,22 @@ This project follows a sprint-based development approach. Each sprint represents
 - Verified live, including through `asyncio.to_thread` (the SDK's actual tool-execution path): a single call produces one trace spanning Tool → Service → Repository → auto-instrumented HTTP spans, and the app behaves identically — no console output at all — when telemetry is disabled (the default).
 - A naming collision was found and fixed during verification: a bare `__qualname__` produced identically-named Tool-layer and Service-layer spans for the same operation (both just `get_item`); span names are now module-qualified.
 
+### 6.4 — OpenTelemetry metrics
+
+- Added [ADR-0013](docs/adr/0013-tiered-definition-of-done-and-platform-hardening.md) (tiered Definition of Done; Sprint 6.6 platform hardening inserted before Sprint 7) and [ADR-0014](docs/adr/0014-opentelemetry-metrics.md) (metrics design).
+- Extended `configure_telemetry()` to also construct a `MeterProvider` (`ConsoleMetricExporter`, 5s export interval), gated by the same `OTEL_ENABLED` flag — no new environment variable, no new dependency (`opentelemetry-sdk`'s metrics support was already installed in 6.3).
+- Extended the `traced()` decorator to record `erpnextagent.call.duration` (`{operation, layer, outcome}`) alongside the span it already creates; `layer` derivation was extracted from `CorrelationFilter` into a shared `observability.correlation.derive_layer()` so logging and metrics classify modules identically instead of duplicating the lookup table.
+- Extended `utils/tool_execution.execute_tool()` to record `erpnextagent.tool.duration` and `erpnextagent.tool.errors` (`{tool, error_type}`), recovering the Tool name from the wrapped closure's `__qualname__` rather than requiring every `tools/*.py` call site to pass it.
+- Extended `ERPNextRESTClient.get()` with an optional `doctype` parameter and a `erpnextagent.erpnext.requests` counter (`{doctype, outcome}`) — confirmed this is additive, not redundant: `opentelemetry-instrumentation-requests` (installed in 6.3) already emits a generic `http.client.duration` histogram automatically once a `MeterProvider` exists, but has no ERPNext-doctype dimension.
+- Replaced the per-test-file OpenTelemetry provider setup with a shared `tests/conftest.py`, fixing a latent ordering hazard: `set_tracer_provider()`/`set_meter_provider()` can only succeed once per process, so whichever test file happened to import first was implicitly deciding this for the whole suite.
+- Verified live: a real Item lookup and an intentionally invalid Customer lookup produced all four metric families with correctly bounded attributes; the app is silent (no console output at all) with `OTEL_ENABLED=false`. The live run also surfaced a real, unrelated issue — the configured ERPNext credentials are currently returning 401 — flagged separately, not a defect in this sprint.
+- Added the Sprint 6 journal ([docs/journal/sprint-06-observability.md](docs/journal/sprint-06-observability.md)), covering 6.4 in full per ADR-0013's Tier 1 Definition of Done; 6.1/6.3 backfill remains Sprint 6.5 scope.
+
 ## Deferred
 
-- Metrics (Sprint 6.4) and the full observability documentation pass (Sprint 6.5) are not yet implemented.
-- OTLP/collector export was deliberately deferred out of 6.3's scope — `ConsoleSpanExporter` is sufficient for local verification, and the exporter is a configuration change, not a code change, whenever a real collector target exists.
+- The full observability documentation pass (Sprint 6.5, including backfilling 6.1/6.3 journal sections) is not yet implemented.
+- Sprint 6.6 (Platform Hardening: resilience/retry, startup config validation, CI, secrets policy, security review) gates Sprint 7 — see ADR-0013.
+- OTLP/collector export was deliberately deferred out of 6.3's and 6.4's scope — the console exporters are sufficient for local verification, and switching exporters is a configuration change, not a code change, whenever a real collector target exists.
 
 ---
 
@@ -219,6 +231,7 @@ This project follows a sprint-based development approach. Each sprint represents
 | 0.4.0 | Sprint 4 |
 | 0.5.0 | Sprint 5.1–5.4 |
 | 0.6.0 | Sprint 5.5–5.7 |
+| 0.7.0 (in progress) | Sprint 6.1, 6.3, 6.4 |
 
 Future releases will continue following semantic versioning aligned with sprint milestones.
 
@@ -229,6 +242,7 @@ Future releases will continue following semantic versioning aligned with sprint 
 | 2026-08-04 | Added documentation-system metadata and navigation. |
 | 2026-08-06 | Recorded Sprint 5.1–5.2 implementation and observability deferral. |
 | 2026-08-07 | Recorded Sprint 5.5 Item lookup completion, Sprint 5.6 mock-repository removal, and Sprint 5.7 tool-layer error handling. Sprint 5 is now complete. |
+| 2026-08-07 | Recorded Sprint 6.4 (OpenTelemetry metrics), ADR-0013 (tiered DoD, Sprint 6.6 platform hardening), and ADR-0014. |
 
 ---
 

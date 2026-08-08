@@ -1,8 +1,9 @@
 import pytest
+from conftest import metric_data_points
 
 from clients.erpnext_rest_client import ERPNextRESTClient
 from settings import get_erpnext_url
-from utils.exceptions import ERPNextError
+from utils.exceptions import ERPNextError, ERPNextResourceNotFoundError
 
 
 def test_client_reuses_a_single_session_with_auth_headers_set_once():
@@ -30,6 +31,58 @@ def test_get_doc_and_get_list_build_expected_resource_paths():
     assert client._build_url("/api/resource/Company") == (
         "http://localhost:8080/api/resource/Company"
     )
+
+
+class _FakeResponse:
+    def __init__(self, status_code, payload=None):
+        self.status_code = status_code
+        self.ok = 200 <= status_code < 400
+        self._payload = payload or {}
+
+    def json(self):
+        return self._payload
+
+
+class _FakeSession:
+    def __init__(self, response):
+        self._response = response
+        self.headers = {}
+
+    def get(self, url, params=None, timeout=None):
+        return self._response
+
+
+def test_get_doc_records_a_request_metric_tagged_with_doctype_and_success():
+    client = ERPNextRESTClient(base_url="http://localhost:8080", api_key="k", api_secret="s")
+    client._session = _FakeSession(_FakeResponse(200, {"data": {"name": "A Sports"}}))
+
+    client.get_doc("Company", "A Sports")
+
+    points = metric_data_points("erpnextagent.erpnext.requests")
+    matching = [
+        (attrs, value)
+        for attrs, value in points
+        if attrs.get("doctype") == "Company" and attrs.get("outcome") == "success"
+    ]
+    assert matching, points
+    assert matching[0][1] >= 1
+
+
+def test_get_doc_records_error_outcome_when_erpnext_returns_not_found():
+    client = ERPNextRESTClient(base_url="http://localhost:8080", api_key="k", api_secret="s")
+    client._session = _FakeSession(_FakeResponse(404))
+
+    with pytest.raises(ERPNextResourceNotFoundError):
+        client.get_doc("Item", "NoSuchItem")
+
+    points = metric_data_points("erpnextagent.erpnext.requests")
+    matching = [
+        (attrs, value)
+        for attrs, value in points
+        if attrs.get("doctype") == "Item" and attrs.get("outcome") == "error"
+    ]
+    assert matching, points
+    assert matching[0][1] >= 1
 
 
 def test_client_can_retrieve_company_information_from_erpnext():

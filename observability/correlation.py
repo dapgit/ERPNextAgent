@@ -31,6 +31,36 @@ def begin_correlation() -> str:
     return correlation_id
 
 
+_LAYER_PREFIXES = (
+    ("repositories.", "repository"),
+    ("clients.", "client"),
+    ("services.", "service"),
+    ("tools.", "tool"),
+)
+
+# utils.tool_execution implements Tool-layer error handling (ADR-0011,
+# Sprint 5.7) but lives under utils/, so the prefix table above wouldn't
+# otherwise classify it correctly.
+_LOGGER_OVERRIDES = {
+    "utils.tool_execution": "tool",
+}
+
+
+def derive_layer(module_name: str) -> str:
+    """
+    Derive the architectural layer (tool/service/repository/client/other)
+    from a module name. Shared by CorrelationFilter (ADR-0011) and the
+    traced() metrics/tracing decorator (ADR-0012, ADR-0014) so the two
+    signals classify the same module the same way.
+    """
+    if module_name in _LOGGER_OVERRIDES:
+        return _LOGGER_OVERRIDES[module_name]
+    for prefix, layer in _LAYER_PREFIXES:
+        if module_name.startswith(prefix):
+            return layer
+    return "other"
+
+
 class CorrelationFilter(logging.Filter):
     """
     Attaches correlation_id and layer to every log record that passes
@@ -38,30 +68,7 @@ class CorrelationFilter(logging.Filter):
     needs to be aware this exists. See ADR-0011.
     """
 
-    _LAYER_PREFIXES = (
-        ("repositories.", "repository"),
-        ("clients.", "client"),
-        ("services.", "service"),
-        ("tools.", "tool"),
-    )
-
-    # utils.tool_execution implements Tool-layer error handling (ADR-0011,
-    # Sprint 5.7) but lives under utils/, so the prefix table above wouldn't
-    # otherwise classify it correctly.
-    _LOGGER_OVERRIDES = {
-        "utils.tool_execution": "tool",
-    }
-
     def filter(self, record: logging.LogRecord) -> bool:
         record.correlation_id = get_correlation_id()
-        record.layer = self._derive_layer(record.name)
+        record.layer = derive_layer(record.name)
         return True
-
-    @classmethod
-    def _derive_layer(cls, logger_name: str) -> str:
-        if logger_name in cls._LOGGER_OVERRIDES:
-            return cls._LOGGER_OVERRIDES[logger_name]
-        for prefix, layer in cls._LAYER_PREFIXES:
-            if logger_name.startswith(prefix):
-                return layer
-        return "other"

@@ -85,4 +85,4 @@ Sprint 7 does not begin until Sprint 6.6 is complete. Sprint 6.6 is itself a Tie
 
 ---
 
-Previous: [ADR 0012](0012-opentelemetry-tracing.md) · Back to the [ADR index](index.md).
+Previous: [ADR 0012](0012-opentelemetry-tracing.md) · Back to the [ADR index](index.md) · Next: [ADR 0014](0014-opentelemetry-metrics.md)
