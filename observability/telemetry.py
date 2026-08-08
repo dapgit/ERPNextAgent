@@ -1,6 +1,7 @@
 import functools
+import os
 import time
-from typing import Callable, Optional
+from typing import IO, Callable, Optional
 
 from opentelemetry import metrics, trace
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
@@ -18,6 +19,20 @@ _configured = False
 # The console metric reader's default export interval is 60s, which would
 # make local verification impractical. See ADR-0014.
 _CONSOLE_METRIC_EXPORT_INTERVAL_MILLIS = 5000
+
+# Console exporters default to stdout, which collides with the interactive
+# CLI's own output — every span and every 5s metric export would print
+# into the same screen the user is chatting in. Route them to files
+# instead, so the terminal stays clean and traces/metrics are available
+# to tail or open when actually wanted. Not a new environment variable:
+# this only changes where the existing console-style exporters write to,
+# not what they emit.
+_LOG_DIR = "logs"
+
+
+def _open_console_log(filename: str) -> IO:
+    os.makedirs(_LOG_DIR, exist_ok=True)
+    return open(os.path.join(_LOG_DIR, filename), "a", encoding="utf-8")
 
 
 def configure_telemetry() -> None:
@@ -39,11 +54,13 @@ def configure_telemetry() -> None:
     resource = Resource.create({"service.name": "erpnextagent"})
 
     tracer_provider = TracerProvider(resource=resource)
-    tracer_provider.add_span_processor(SimpleSpanProcessor(ConsoleSpanExporter()))
+    tracer_provider.add_span_processor(
+        SimpleSpanProcessor(ConsoleSpanExporter(out=_open_console_log("traces.log")))
+    )
     trace.set_tracer_provider(tracer_provider)
 
     metric_reader = PeriodicExportingMetricReader(
-        ConsoleMetricExporter(),
+        ConsoleMetricExporter(out=_open_console_log("metrics.log")),
         export_interval_millis=_CONSOLE_METRIC_EXPORT_INTERVAL_MILLIS,
     )
     meter_provider = MeterProvider(resource=resource, metric_readers=[metric_reader])

@@ -1,6 +1,8 @@
+import os
+
 from conftest import metric_data_points, span_exporter
 
-from observability.telemetry import get_meter, get_tracer, traced
+from observability.telemetry import _open_console_log, get_meter, get_tracer, traced
 
 
 def _spans_by_name():
@@ -94,6 +96,18 @@ def test_get_tracer_returns_a_usable_tracer():
 def test_get_meter_returns_a_usable_meter():
     meter = get_meter("some.module")
     assert meter is not None
+
+
+def test_open_console_log_creates_the_logs_directory_and_an_appendable_file():
+    handle = _open_console_log("test-open-console-log.log")
+    try:
+        assert os.path.isdir("logs")
+        handle.write("probe\n")
+        handle.flush()
+        assert os.path.exists(os.path.join("logs", "test-open-console-log.log"))
+    finally:
+        handle.close()
+        os.remove(os.path.join("logs", "test-open-console-log.log"))
 
 
 def test_traced_records_call_duration_with_operation_layer_and_success_outcome():

@@ -130,6 +130,12 @@ OpenTelemetry was evaluated during Sprint 5 and deferred so the first REST path 
 
 [ADR-0013](adr/0013-tiered-definition-of-done-and-platform-hardening.md) adds Sprint 6.6 — Platform Hardening — after 6.5 and before Sprint 7: retry/backoff for transient ERPNext failures and graceful handling of upstream rate-limit errors, fail-fast startup configuration validation, a CI pipeline, a written secrets-handling policy, and a security review pass. Sprint 7 does not begin until 6.6 is complete. The same ADR adopts a tiered Definition of Done — the full architecture/implementation/documentation/validation cycle for architecture-affecting sprints, a lighter code+tests+changelog-line cycle for small maintenance work — and reframes the project's primary objective as becoming enterprise-class, with the concrete gaps that still separates it from that (auth/authz, secrets management, CI, resilience, security review) tracked explicitly in the [checkpoint](checkpoints/PROJECT_CHECKPOINT.md) rather than assumed closed.
 
+The console trace/metric exporters (6.3, 6.4) initially wrote to stdout, which collided with the interactive CLI's own output; they were redirected to `logs/traces.log` / `logs/metrics.log` post-6.4 (Tier 2, see CHANGELOG).
+
+### Deferred: a real local collector (not yet scheduled)
+
+Console-to-file output is sufficient for now, but if that proves too clunky in day-to-day use, the next step is a real local collector instead of files to tail: an OTLP collector with Jaeger for trace visualization and Prometheus/Grafana for metrics dashboards, likely run via Docker Compose alongside the app. This was deliberately deferred in ADR-0012/0014 — switching the exporters from console to OTLP is a configuration change, not a code change, whenever this is picked up. Not assigned to a specific sprint yet; revisit if the file-based approach stops being enough.
+
 ---
 
 ## Long-Term Vision
@@ -159,6 +165,7 @@ Completed-sprint evidence is maintained in the [sprint journals](journal/index.m
 | 2026-08-07 | Marked Sprint 6.3 (OpenTelemetry tracing) complete. |
 | 2026-08-07 | Added Sprint 6.6 (Platform Hardening, gating Sprint 7) and the tiered Definition of Done, per ADR-0013. |
 | 2026-08-07 | Marked Sprint 6.4 (OpenTelemetry metrics) complete, per ADR-0014. |
+| 2026-08-08 | Redirected console trace/metric exporters to log files (Tier 2); added the deferred local-collector item. |
 
 ---
 

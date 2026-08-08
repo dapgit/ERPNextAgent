@@ -47,6 +47,11 @@ This project follows a sprint-based development approach. Each sprint represents
 - Verified live: a real Item lookup and an intentionally invalid Customer lookup produced all four metric families with correctly bounded attributes; the app is silent (no console output at all) with `OTEL_ENABLED=false`. The live run also surfaced a real, unrelated issue — the configured ERPNext credentials are currently returning 401 — flagged separately, not a defect in this sprint.
 - Added the Sprint 6 journal ([docs/journal/sprint-06-observability.md](docs/journal/sprint-06-observability.md)), covering 6.4 in full per ADR-0013's Tier 1 Definition of Done; 6.1/6.3 backfill remains Sprint 6.5 scope.
 
+### Post-6.4 — Console exporters redirected to log files (Tier 2)
+
+- `ConsoleSpanExporter`/`ConsoleMetricExporter` (both default to stdout) were flooding the interactive CLI's own screen — every span, and every metric export every 5 seconds, printed inline with the chat. Redirected both to `logs/traces.log` / `logs/metrics.log` via their existing `out` parameter; `logs/` is gitignored. No new environment variable — this only changes where the existing console-style exporters write to, not what they emit.
+- Verified live: stdout now shows only the app's normal text logs and the chat answer; `logs/traces.log` and `logs/metrics.log` fill up correctly and can be tailed separately.
+
 ## Deferred
 
 - The full observability documentation pass (Sprint 6.5, including backfilling 6.1/6.3 journal sections) is not yet implemented.
